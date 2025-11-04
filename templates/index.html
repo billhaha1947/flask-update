@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tải lên Cloudinary</title>
+  <title>Upload Server</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,7 +25,7 @@
     input[type="file"] {
       margin-top: 15px;
     }
-    button {
+    button, a.btn {
       margin-top: 20px;
       padding: 10px 20px;
       border: none;
@@ -33,28 +33,29 @@
       color: white;
       border-radius: 8px;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
     }
-    button:hover {
+    button:hover, a.btn:hover {
       background: #45a049;
     }
     #result {
       margin-top: 15px;
       color: #333;
-      word-wrap: break-word;
-    }
-    a {
-      color: #007BFF;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>📤 Tải lên Cloudinary</h2>
+    <h2>📤 Upload File</h2>
     <form id="uploadForm">
       <input type="file" name="file" id="fileInput" required />
       <br>
       <button type="submit">Tải lên</button>
     </form>
+
+    <a href="/gallery" class="btn">📸 Xem thư viện</a>
+
     <div id="result"></div>
   </div>
 
@@ -66,26 +67,18 @@
       const formData = new FormData();
       formData.append('file', fileInput.files[0]);
 
-      const resultDiv = document.getElementById('result');
-      resultDiv.textContent = "⏳ Đang tải lên...";
+      const res = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
 
-      try {
-        const res = await fetch('/upload', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-
-        if (data.url) {
-          const isVideo = data.url.includes(".mp4") || data.url.includes("/video/");
-          resultDiv.innerHTML = isVideo
-            ? `✅ <b>Tải lên thành công!</b><br><video src="${data.url}" controls width="100%"></video><br><a href="${data.url}" target="_blank">Mở video</a>`
-            : `✅ <b>Tải lên thành công!</b><br><img src="${data.url}" style="max-width:100%; border-radius:8px;"><br><a href="${data.url}" target="_blank">Mở ảnh</a>`;
-        } else {
-          resultDiv.textContent = "❌ Lỗi tải lên!";
-        }
-      } catch (err) {
-        resultDiv.textContent = "❌ Đã xảy ra lỗi khi tải lên!";
+      if (data.url) {
+        document.getElementById('result').innerHTML = 
+          `✅ Tải lên thành công!<br>
+           🔗 <a href="${data.url}" target="_blank">Xem file</a>`;
+      } else {
+        document.getElementById('result').textContent = '❌ Lỗi tải lên!';
       }
     });
   </script>
