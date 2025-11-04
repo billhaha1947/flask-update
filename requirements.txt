@@ -1,1 +1,4 @@
-flask\ncloudinary
+flask
+cloudinary
+gunicorn
+
