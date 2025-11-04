@@ -43,7 +43,7 @@ def upload():
         </style>
     </head>
     <body>
-        <h2>☁ Tải ảnh hoặc video lên Cloudinary</h2>
+        <h2>☁ Tải ảnh hoặc video lên FLASK</h2>
         <form id="uploadForm" method="post" enctype="multipart/form-data">
             <input type="file" name="file" required>
             <br>
@@ -53,7 +53,7 @@ def upload():
             <div id="progress-bar"></div>
         </div>
         <br>
-        <a href="/gallery">📸 Xem thư viện</a>
+        <a href="/gallery">📸 Xem ảnh đã lưu</a>
 
         <script>
         const form = document.getElementById('uploadForm');
