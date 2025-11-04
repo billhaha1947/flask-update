@@ -1,47 +1,17 @@
-from flask import Flask, request, jsonify, send_from_directory
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-import os
-
-app = Flask(__name__)
-
-# ⚙️ Cấu hình Cloudinary
-cloudinary.config(
-    cloud_name="dma3eclgv",       # 👈 Thay bằng CLOUD_NAME của bạn
-    api_key="118974677734641",    # 👈 Thay bằng API_KEY
-    api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4"  # 👈 Thay bằng API_SECRET
-)
-
-@app.route('/')
-def home():
-    return send_from_directory('.', 'index.html')
-
-@app.route('/upload', methods=['POST'])
-def upload():
-    if 'file' not in request.files:
-        return jsonify({"error": "Không có file trong request"}), 400
-
-    file = request.files['file']
-    # ⚡ Cho phép Cloudinary tự nhận dạng ảnh hoặc video
-    result = cloudinary.uploader.upload(file, resource_type="auto")
-    return jsonify({
-        "url": result['secure_url'],
-        "public_id": result['public_id']
-    })
+from cloudinary import Search
 
 @app.route('/gallery')
 def gallery():
     try:
-        # ⚙️ Lấy danh sách tất cả tài nguyên (ảnh + video)
-        resources = cloudinary.api.resources(
-            resource_type="all",
-            max_results=50,
-            type="upload"
-        )
-        items = [r['secure_url'] for r in resources['resources']]
+        # Tìm tất cả file upload gần nhất
+        results = Search()\
+            .expression("resource_type:image OR resource_type:video")\
+            .sort_by("created_at", "desc")\
+            .max_results(50)\
+            .execute()
 
-        # 🖼️ Tạo giao diện HTML để hiển thị file
+        items = [r['secure_url'] for r in results['resources']]
+
         html = """
         <!DOCTYPE html>
         <html lang="vi">
@@ -111,7 +81,3 @@ def gallery():
 
     except Exception as e:
         return f"<h3 style='color:red;'>❌ Lỗi lấy dữ liệu: {str(e)}</h3>"
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
