@@ -17,7 +17,7 @@
       background: white;
       padding: 30px;
       border-radius: 15px;
-      box-shadow: 0 0 10px 
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
       width: 90%;
       max-width: 400px;
       text-align: center;
@@ -25,7 +25,7 @@
     input[type="file"] {
       margin-top: 15px;
     }
-    button, a.btn {
+    button {
       margin-top: 20px;
       padding: 10px 20px;
       border: none;
@@ -33,15 +33,44 @@
       color: white;
       border-radius: 8px;
       cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
     }
-    button:hover, a.btn:hover {
+    button:hover {
       background: #45a049;
+    }
+    #progressContainer {
+      margin-top: 15px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 10px;
+      height: 20px;
+      overflow: hidden;
+      display: none;
+    }
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background: #4CAF50;
+      text-align: center;
+      color: white;
+      font-size: 12px;
+      transition: width 0.2s;
     }
     #result {
       margin-top: 15px;
       color: #333;
+      word-wrap: break-word;
+    }
+    a.btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 8px 15px;
+      background: #2196F3;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    a.btn:hover {
+      background: #1976D2;
     }
   </style>
 </head>
@@ -54,32 +83,67 @@
       <button type="submit">Tải lên</button>
     </form>
 
-    <a href="/gallery" class="btn">📸 Xem thư viện</a>
+    <div id="progressContainer">
+      <div id="progressBar">0%</div>
+    </div>
 
     <div id="result"></div>
+
+    <a href="/gallery" class="btn">📁 Xem thư viện</a>
   </div>
 
   <script>
     const form = document.getElementById('uploadForm');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const result = document.getElementById('result');
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) return;
+
       const formData = new FormData();
-      formData.append('file', fileInput.files[0]);
+      formData.append('file', file);
 
-      const res = await fetch('/upload', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      progressBar.textContent = '0%';
+      result.textContent = '';
 
-      if (data.url) {
-        document.getElementById('result').innerHTML = 
-          `✅ Tải lên thành công!<br>
-           🔗 <a href="${data.url}" target="_blank">Xem file</a>`;
-      } else {
-        document.getElementById('result').textContent = '❌ Lỗi tải lên!';
-      }
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload', true);
+
+      // 📊 Hiển thị tiến trình upload
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          progressBar.style.width = percent + '%';
+          progressBar.textContent = percent + '%';
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          progressBar.style.width = '100%';
+          progressBar.textContent = '100%';
+          result.innerHTML = `
+            ✅ Tải lên thành công!<br>
+            🔗 <a href="${data.url}" target="_blank">Xem file tại đây</a>
+          `;
+        } else {
+          result.textContent = '❌ Lỗi tải lên!';
+        }
+      };
+
+      xhr.onerror = () => {
+        result.textContent = '❌ Không thể kết nối tới server.';
+      };
+
+      xhr.send(formData);
     });
   </script>
 </body>
