@@ -24,8 +24,7 @@ def upload():
         return jsonify({"error": "Không có file trong request"}), 400
 
     file = request.files['file']
-    result = cloudinary.uploader.upload(file)
-
+    result = cloudinary.uploader.upload(file, resource_type="auto")
     return jsonify({
         "url": result['secure_url'],
         "public_id": result['public_id']
