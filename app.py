@@ -1,26 +1,41 @@
-from flask import Flask, render_template
-import cloudinary
+from flask import Flask, request, send_file, send_from_directory, jsonify
 import os
 
 app = Flask(__name__)
 
-# ⚙️ Cấu hình Cloudinary từ biến môi trường Render
-cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET")
-)
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return send_file('index.html')  # Trả về trang upload
+
 
 @app.route('/gallery')
 def gallery():
-    # Lấy ảnh từ Cloudinary (lấy 50 ảnh gần nhất)
-    from cloudinary.api import resources
-    result = resources(max_results=50)
-    return render_template('gallery.html', resources=result['resources'])
+    return send_file('gallery.html')  # Trả về trang thư viện
+
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return jsonify({'error': 'Không có file nào!'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'Tên file trống!'}), 400
+
+    path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    file.save(path)
+    return jsonify({'url': f"/uploads/{file.filename}"})
+
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=10000)
