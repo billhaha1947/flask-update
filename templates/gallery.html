@@ -1,178 +1,136 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📸 Thư viện Cloudinary</title>
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: "Inter", sans-serif;
+      font-family: "Segoe UI", sans-serif;
+      background: #f7f9fb;
       margin: 0;
-      background-color: #f4f6f8;
-      overflow-x: hidden;
+      padding: 0;
     }
 
     h1 {
-      text-align: center;
-      background-color: #007bff;
+      background: #007bff;
       color: white;
-      padding: 15px 0;
+      padding: 15px;
+      text-align: center;
       margin: 0;
-      font-size: 22px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
     .back-btn {
       display: block;
-      width: fit-content;
-      margin: 20px auto;
+      margin: 15px auto;
       background: #28a745;
       color: white;
       padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
       text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      text-align: center;
     }
 
-    /* --- GRID 3 cột --- */
-    .gallery {
+    .gallery-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 10px;
-      padding: 0 10px 50px;
+      gap: 12px;
+      padding: 10px;
+      max-width: 900px;
+      margin: 0 auto;
     }
 
     .card {
       position: relative;
+      border-radius: 12px;
       overflow: hidden;
-      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      cursor: pointer;
       background: white;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-      transition: transform 0.25s ease;
+      transition: transform 0.2s ease;
     }
 
     .card:hover {
-      transform: scale(1.04);
+      transform: scale(1.03);
     }
 
-    .card img,
-    .card video {
+    .card img, .card video {
       width: 100%;
       height: 120px;
       object-fit: cover;
       display: block;
-      cursor: pointer;
-      transition: transform 0.25s ease;
-    }
-
-    .card video {
-      background: black;
-    }
-
-    .card:hover img,
-    .card:hover video {
-      transform: scale(1.05);
     }
 
     .delete-btn {
       position: absolute;
-      top: 6px;
-      right: 6px;
+      top: 5px;
+      right: 5px;
       background: red;
       color: white;
       border: none;
       border-radius: 50%;
       width: 32px;
       height: 32px;
-      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      font-size: 16px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease;
     }
 
-    .delete-btn:hover {
-      background: darkred;
-      transform: scale(1.1);
-    }
-
-    /* --- Popup --- */
     .popup {
-      visibility: hidden;
-      opacity: 0;
+      display: none;
       position: fixed;
-      z-index: 999;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0,0,0,0.85);
-      display: flex;
-      justify-content: center;
       align-items: center;
-      transition: opacity 0.35s ease, visibility 0.35s ease;
-    }
-
-    .popup.show {
-      visibility: visible;
-      opacity: 1;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
     }
 
     .popup-content {
-      position: relative;
-      animation: zoomIn 0.4s ease;
-    }
-
-    @keyframes zoomIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      animation: zoomIn 0.3s ease;
     }
 
     .popup img, .popup video {
-      max-width: 95%;
-      max-height: 90%;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 10px;
     }
 
-    .close-btn {
-      position: absolute;
-      top: -40px;
-      right: -10px;
-      color: white;
-      font-size: 32px;
-      text-decoration: none;
-      font-weight: bold;
-      background: rgba(0,0,0,0.5);
-      border-radius: 50%;
-      padding: 6px 12px;
-      cursor: pointer;
-      transition: 0.2s;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
-    .close-btn:hover {
-      background: rgba(255,255,255,0.3);
+    @keyframes zoomIn {
+      from { transform: scale(0.8); }
+      to { transform: scale(1); }
     }
-
   </style>
 </head>
 <body>
 
   <h1>📸 Thư viện Cloudinary</h1>
-
   <a href="/" class="back-btn">⬅️ Quay lại Upload</a>
 
-  <div class="gallery">
+  <div class="gallery-container">
     {% for res in resources %}
       <div class="card" onclick="openPopup('{{ res.secure_url }}', '{{ res.resource_type }}')">
-        {% if res.resource_type == "video" %}
-          <video muted loop>
+        {% if res.resource_type == 'video' or (res.resource_type == 'raw' and res.format in ['mp4', 'mov']) %}
+          <video muted playsinline loop>
             <source src="{{ res.secure_url }}" type="video/mp4">
           </video>
         {% else %}
@@ -183,50 +141,29 @@
     {% endfor %}
   </div>
 
-  <!-- Popup container -->
-  <div id="popup" class="popup" onclick="closePopup(event)">
-    <div class="popup-content">
-      <span class="close-btn" onclick="closePopup(event)">&times;</span>
-      <img id="popup-img" src="" alt="Ảnh lớn" style="display:none;">
-      <video id="popup-video" controls autoplay style="display:none;"></video>
-    </div>
+  <div class="popup" id="popup" onclick="closePopup()">
+    <div class="popup-content" id="popup-content"></div>
   </div>
 
   <script>
-    function deleteFile(publicId) {
-      if (confirm("Xóa file này?")) {
-        fetch(`/delete/${publicId}`, { method: "DELETE" })
-          .then(res => {
-            if (res.ok) location.reload();
-            else alert("Không thể xóa file.");
-          });
-      }
-    }
-
-    const popup = document.getElementById("popup");
-    const popupImg = document.getElementById("popup-img");
-    const popupVideo = document.getElementById("popup-video");
-
     function openPopup(url, type) {
-      popup.classList.add("show");
-      if (type === "video") {
-        popupVideo.src = url;
-        popupVideo.style.display = "block";
-        popupImg.style.display = "none";
-      } else {
-        popupImg.src = url;
-        popupImg.style.display = "block";
-        popupVideo.style.display = "none";
-      }
+      const popup = document.getElementById("popup");
+      const content = document.getElementById("popup-content");
+      content.innerHTML = type === "video" ? 
+        `<video src="${url}" controls autoplay></video>` : 
+        `<img src="${url}" alt="Ảnh gốc">`;
+      popup.style.display = "flex";
     }
 
-    function closePopup(event) {
-      if (event.target === popup || event.target.classList.contains('close-btn')) {
-        popup.classList.remove("show");
-        popupImg.src = "";
-        popupVideo.pause();
-        popupVideo.src = "";
-      }
+    function closePopup() {
+      const popup = document.getElementById("popup");
+      popup.style.display = "none";
+    }
+
+    async function deleteFile(publicId) {
+      if (!confirm("Xoá file này?")) return;
+      const res = await fetch(`/delete/${publicId}`, { method: "DELETE" });
+      if (res.ok) location.reload();
     }
   </script>
 
