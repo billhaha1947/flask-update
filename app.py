@@ -1,98 +1,46 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template, jsonify
 import cloudinary
 import cloudinary.uploader
 from cloudinary import Search
+import os
 
 app = Flask(__name__)
 
-# 🔧 Cấu hình Cloudinary (thay bằng thông tin thật của bạn)
+# 🔧 Cấu hình Cloudinary
 cloudinary.config(
     cloud_name="dma3eclgv",
     api_key="118974677734641",
     api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4"
 )
 
-# 🏠 Trang upload chính
-@app.route('/', methods=['GET', 'POST'])
-def upload():
-    if request.method == 'POST':
+# 🏠 Trang upload chính (render index.html)
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+# 📤 API nhận file upload
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'Không có file nào được gửi.'}), 400
+
         file = request.files['file']
-        if file:
-            upload_result = cloudinary.uploader.upload(file)
-            return f"""
-            <h2>✅ Upload thành công!</h2>
-            <p><a href='{upload_result['secure_url']}' target='_blank'>Xem file tại đây</a></p>
-            <a href='/gallery'>📸 Xem thư viện</a><br><br>
-            <a href='/'>⬅ Quay lại Upload</a>
-            """
-    return render_template_string('''
-    <!DOCTYPE html>
-    <html lang="vi">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>☁ Upload lên Cloudinary</title>
-        <style>
-            body { font-family: Arial; text-align: center; padding: 50px; background: #f0f0f0; }
-            form { background: white; padding: 20px; border-radius: 10px; display: inline-block; }
-            input[type=file] { margin: 10px; }
-            button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
-            button:hover { background: #45a049; }
-            #progress-container { width: 100%; background: #ddd; border-radius: 5px; display: none; margin-top: 10px; }
-            #progress-bar { height: 20px; background: #4CAF50; width: 0%; border-radius: 5px; }
-        </style>
-    </head>
-    <body>
-        <h2>☁ Tải ảnh hoặc video lên FLASK</h2>
-        <form id="uploadForm" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" required>
-            <br>
-            <button type="submit">📤 Upload</button>
-        </form>
-        <div id="progress-container">
-            <div id="progress-bar"></div>
-        </div>
-        <br>
-        <a href="/gallery">📸 Xem ảnh đã lưu</a>
+        if file.filename == '':
+            return jsonify({'error': 'Tên file trống.'}), 400
 
-        <script>
-        const form = document.getElementById('uploadForm');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
+        # ⚡ Upload lên Cloudinary (tự nhận ảnh hoặc video)
+        upload_result = cloudinary.uploader.upload(file, resource_type="auto")
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const fileInput = form.querySelector('input[type=file]');
-            if (!fileInput.files.length) return;
+        return jsonify({
+            'message': 'Tải lên thành công!',
+            'url': upload_result['secure_url']
+        })
 
-            const file = fileInput.files[0];
-            const xhr = new XMLHttpRequest();
-            const formData = new FormData();
-            formData.append('file', file);
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-            xhr.upload.addEventListener('progress', function(e) {
-                if (e.lengthComputable) {
-                    const percent = (e.loaded / e.total) * 100;
-                    progressContainer.style.display = 'block';
-                    progressBar.style.width = percent + '%';
-                }
-            });
-
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    document.body.innerHTML = xhr.responseText;
-                } else {
-                    alert('❌ Upload thất bại');
-                }
-            };
-
-            xhr.open('POST', '/', true);
-            xhr.send(formData);
-        });
-        </script>
-    </body>
-    </html>
-    ''')
 
 # 🖼 Trang thư viện ảnh/video
 @app.route('/gallery')
@@ -142,5 +90,7 @@ def gallery():
     except Exception as e:
         return f"<h3 style='color:red;'>❌ Lỗi lấy dữ liệu: {str(e)}</h3>"
 
+
 if __name__ == '__main__':
+    # ⚙ chạy Flask
     app.run(debug=True)
