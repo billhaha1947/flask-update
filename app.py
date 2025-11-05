@@ -10,9 +10,9 @@ app = Flask(__name__)
 
 # Cấu hình Cloudinary
 cloudinary.config(
-    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.getenv('CLOUDINARY_API_KEY'),
-    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+    cloud_name=os.getenv('dma3eclgv'),
+    api_key=os.getenv('118974677734641'),
+    api_secret=os.getenv('8Dhe37EYtXQVaaPpCsDlRRZSrE4')
 )
 
 @app.route('/')
