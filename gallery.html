@@ -2,92 +2,45 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thư viện ảnh</title>
   <style>
     body {
-      font-family: Poppins, sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+      margin: 0; padding: 20px;
       text-align: center;
-      padding: 30px;
     }
-    .grid {
+    h1 { margin-bottom: 20px; }
+    .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 15px;
-      margin-top: 20px;
     }
-    .grid img {
+    .gallery img, .gallery video {
       width: 100%;
       border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
       cursor: pointer;
-      transition: transform 0.3s;
-      object-fit: cover;
-      height: 160px;
     }
-    .grid img:hover { transform: scale(1.05); }
-    a.btn {
-      display: inline-block;
-      margin-top: 20px;
-      background: #4CAF50;
-      padding: 10px 20px;
-      border-radius: 8px;
-      color: white;
-      text-decoration: none;
+    .gallery img:hover, .gallery video:hover {
+      transform: scale(1.05);
     }
-    a.btn:hover { background: #45a049; }
-
-    /* Hiệu ứng xem ảnh gốc */
-    .lightbox {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-    }
+    a { color: #00ff99; display: inline-block; margin-top: 20px; }
   </style>
 </head>
 <body>
   <h1>📁 Thư viện ảnh</h1>
-  <div class="grid" id="gallery"></div>
-  <a href="/" class="btn">⬅️ Quay lại Upload</a>
+  <a href="/">⬅ Quay lại Upload</a>
 
-  <div class="lightbox" id="lightbox">
-    <img id="lightboxImg" src="">
+  <div class="gallery">
+    {% for item in media %}
+      {% if 'image' in item.resource_type %}
+        <img src="{{ item.secure_url }}" alt="Ảnh">
+      {% elif 'video' in item.resource_type %}
+        <video src="{{ item.secure_url }}" controls></video>
+      {% endif %}
+    {% endfor %}
   </div>
-
-  <script>
-    const gallery = document.getElementById('gallery');
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightboxImg');
-
-    // Lấy danh sách file từ server
-    fetch('/uploads')
-      .then(r => r.json())
-      .then(files => {
-        files.forEach(f => {
-          const img = document.createElement('img');
-          img.src = `/uploads/${f}`;
-          img.alt = f;
-          img.onclick = () => {
-            lightbox.style.display = 'flex';
-            lightboxImg.src = img.src;
-          };
-          gallery.appendChild(img);
-        });
-      });
-
-    lightbox.onclick = () => lightbox.style.display = 'none';
-  </script>
 </body>
 </html>
