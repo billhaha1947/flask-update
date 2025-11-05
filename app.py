@@ -1,66 +1,65 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+import os
 
 app = Flask(__name__)
 
-# 🔐 Mật khẩu admin (chỉ người biết mới xoá được)
-ADMIN_PASSWORD = "loc123"  # ⚠️ đổi lại theo ý bạn
-
-# ☁️ Cloudinary config (điền đúng của bạn)
+# ==========================
+# 🔧 CẤU HÌNH CLOUDINARY
+# ==========================
 cloudinary.config(
-    cloud_name="dma3eclgv",
-    api_key="118974677734641",
-    api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4"
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME", "dma3eclgv"),
+    api_key=os.getenv("CLOUDINARY_API_KEY", "118974677734641"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET", "8Dhe37EYtXQVaaPpCsDIRRZSrE4"),
 )
 
-@app.route('/')
+# ==========================
+# 🔒 MẬT KHẨU ADMIN XOÁ ẢNH
+# ==========================
+ADMIN_PASSWORD = "loc123"  # đổi thành mật khẩu của bạn
+
+# ==========================
+# 🏠 TRANG UPLOAD
+# ==========================
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
+# ==========================
+# 📤 UPLOAD FILE LÊN CLOUDINARY
+# ==========================
+@app.route("/upload", methods=["POST"])
+def upload():
+    if "file" not in request.files:
+        return jsonify({"error": "Không có file nào được gửi"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "Tên file trống"}), 400
+
     try:
-        if 'file' not in request.files:
-            return jsonify({"error": "Không có file nào được gửi."}), 400
-
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "File trống."}), 400
-
         upload_result = cloudinary.uploader.upload(file, resource_type="auto")
-        return jsonify({"url": upload_result["secure_url"]})
-
+        return jsonify(upload_result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/gallery')
-def gallery_page():
-    return render_template('gallery.html')
-
-@app.route('/api/gallery')
-def get_gallery():
+# ==========================
+# 🖼️ TRANG THƯ VIỆN GALLERY
+# ==========================
+@app.route("/gallery")
+def gallery():
     try:
-        results = cloudinary.Search()\
-            .expression("resource_type:image OR resource_type:video")\
-            .sort_by("created_at", "desc")\
-            .max_results(50)\
-            .execute()
-
-        files = []
-        for r in results["resources"]:
-            files.append({
-                "url": r["secure_url"],
-                "type": r["resource_type"],
-                "public_id": r["public_id"]
-            })
-        return jsonify(files)
-
+        resources = cloudinary.api.resources(type="upload", max_results=50)
+        return render_template("gallery.html", resources=resources["resources"])
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return f"Lỗi tải gallery: {e}"
 
-@app.route('/api/delete/<public_id>', methods=['POST'])
+# ==========================
+# 🗑️ XOÁ FILE (CHỈ ADMIN)
+# ==========================
+@app.route("/api/delete/<public_id>", methods=["POST"])
 def delete(public_id):
     try:
         data = request.get_json()
@@ -69,11 +68,19 @@ def delete(public_id):
         if password != ADMIN_PASSWORD:
             return jsonify({"error": "Không có quyền xóa."}), 403
 
-        result = cloudinary.uploader.destroy(public_id, resource_type="auto")
+        # ✅ Lấy loại file (image/video)
+        info = cloudinary.api.resource(public_id)
+        resource_type = info.get("resource_type", "image")
+
+        # ✅ Xoá đúng loại file
+        result = cloudinary.uploader.destroy(public_id, resource_type=resource_type)
         return jsonify(result)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# ==========================
+# 🔥 CHẠY ỨNG DỤNG
+# ==========================
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)
