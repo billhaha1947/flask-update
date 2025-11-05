@@ -3,178 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📁 Thư viện Cloud</title>
+  <title>Thư viện Cloudinary</title>
   <style>
     body {
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      min-height: 100vh;
+      font-family: Poppins, sans-serif;
+      background: #f5f7fa;
       margin: 0;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 10px;
     }
-
-    h1 {
+    h2 {
       text-align: center;
-      font-size: 2.2em;
-      font-weight: 600;
-      margin-bottom: 25px;
-      text-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      background: #4CAF50;
+      color: white;
+      padding: 20px 0;
+      margin: 0;
     }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 18px;
-      width: 100%;
-      max-width: 1100px;
+      gap: 20px;
+      padding: 20px;
     }
-
     .item {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       overflow: hidden;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
       position: relative;
+      transition: transform 0.2s;
     }
-    .item:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-    }
-
+    .item:hover { transform: scale(1.02); }
     img, video {
       width: 100%;
-      display: block;
-      border-radius: 16px 16px 0 0;
+      height: 200px;
+      object-fit: cover;
     }
-
-    .info {
-      padding: 10px 12px;
-      font-size: 0.85em;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .info a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: 500;
-      opacity: 0.8;
-    }
-    .info a:hover {
-      opacity: 1;
-    }
-
-    .delete {
-      background: rgba(255, 80, 80, 0.8);
+    .delete-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(255,0,0,0.8);
+      color: white;
       border: none;
-      border-radius: 8px;
-      color: white;
-      padding: 5px 10px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
       cursor: pointer;
-      transition: 0.2s;
+      font-size: 18px;
     }
-    .delete:hover {
-      background: rgba(255, 0, 0, 0.9);
-      transform: scale(1.05);
-    }
-
-    .topbar {
-      width: 100%;
-      max-width: 1100px;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      align-items: center;
-    }
-
-    .btn {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
+    .delete-btn:hover { background: red; }
+    a.back {
+      display: inline-block;
+      margin: 20px;
+      padding: 10px 20px;
+      background: #2196F3;
       color: white;
-      padding: 8px 14px;
-      border-radius: 10px;
+      border-radius: 8px;
       text-decoration: none;
-      font-weight: 500;
-      transition: 0.3s;
-    }
-    .btn:hover {
-      background: rgba(255,255,255,0.3);
-      transform: scale(1.05);
-    }
-
-    .footer {
-      margin-top: 40px;
-      font-size: 0.8em;
-      opacity: 0.7;
     }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <a href="/" class="btn">⬅ Trang Upload</a>
-    <h1>📁 Thư viện Cloudinary</h1>
-    <button class="btn" id="refreshBtn">🔄 Làm mới</button>
-  </div>
-
-  <div class="grid" id="galleryGrid">
-    <p>⏳ Đang tải thư viện...</p>
-  </div>
-
-  <div class="footer">© 2025 Cloud Upload Portal</div>
+  <h2>📸 Thư viện Cloudinary</h2>
+  <a href="/" class="back">⬅ Quay lại Upload</a>
+  <div id="gallery" class="grid"></div>
 
   <script>
     async function loadGallery() {
-      const grid = document.getElementById('galleryGrid');
-      grid.innerHTML = "<p>⏳ Đang tải dữ liệu...</p>";
+      const res = await fetch('/api/gallery');
+      const data = await res.json();
+      const container = document.getElementById('gallery');
+      container.innerHTML = '';
 
-      try {
-        const res = await fetch('/api/gallery');
-        const data = await res.json();
-        if (!data.items || data.items.length === 0) {
-          grid.innerHTML = "<p>📭 Chưa có file nào trong thư viện.</p>";
-          return;
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        if (item.type === 'video') {
+          div.innerHTML = `<video controls src="${item.url}"></video>`;
+        } else {
+          div.innerHTML = `<img src="${item.url}" alt="file">`;
         }
-
-        grid.innerHTML = "";
-        data.items.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'item';
-          div.innerHTML = `
-            ${item.resource_type === 'video'
-              ? `<video src="${item.secure_url}" controls></video>`
-              : `<img src="${item.secure_url}" alt="file" />`}
-            <div class="info">
-              <a href="${item.secure_url}" target="_blank">🔗 Xem</a>
-              <button class="delete" onclick="deleteItem('${item.public_id}')">🗑️</button>
-            </div>
-          `;
-          grid.appendChild(div);
-        });
-      } catch (err) {
-        grid.innerHTML = "<p>❌ Lỗi tải thư viện!</p>";
-      }
+        const btn = document.createElement('button');
+        btn.className = 'delete-btn';
+        btn.innerHTML = '🗑️';
+        btn.onclick = () => deleteFile(item.public_id);
+        div.appendChild(btn);
+        container.appendChild(div);
+      });
     }
 
-    async function deleteItem(id) {
-      if (!confirm("Bạn có chắc muốn xóa file này không?")) return;
-      try {
-        const res = await fetch(`/api/delete/${id}`, { method: 'DELETE' });
-        const data = await res.json();
-        alert(data.message || "Đã xóa!");
-        loadGallery();
-      } catch {
-        alert("❌ Lỗi khi xóa file!");
-      }
+    function deleteFile(public_id) {
+      const password = prompt("Nhập mật khẩu admin để xóa:");
+      if (!password) return;
+
+      fetch(`/api/delete/${public_id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.result === "ok") {
+          alert("🗑️ Đã xóa thành công!");
+          loadGallery();
+        } else {
+          alert(data.error || "❌ Không thể xóa!");
+        }
+      });
     }
 
-    document.getElementById('refreshBtn').addEventListener('click', loadGallery);
     loadGallery();
   </script>
 </body>
