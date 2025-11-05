@@ -72,7 +72,12 @@
       transition: transform 0.25s ease;
     }
 
-    .card:hover img {
+    .card video {
+      background: black;
+    }
+
+    .card:hover img,
+    .card:hover video {
       transform: scale(1.05);
     }
 
@@ -167,7 +172,7 @@
     {% for res in resources %}
       <div class="card" onclick="openPopup('{{ res.secure_url }}', '{{ res.resource_type }}')">
         {% if res.resource_type == "video" %}
-          <video muted>
+          <video muted loop>
             <source src="{{ res.secure_url }}" type="video/mp4">
           </video>
         {% else %}
