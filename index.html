@@ -2,37 +2,46 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Upload Ảnh / Video</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang chính</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      color: #fff;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      height: 100vh; margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-    form {
-      background: rgba(255,255,255,0.15);
-      padding: 20px; border-radius: 15px;
-      display: flex; flex-direction: column;
-      gap: 10px; text-align: center;
+    .container {
+      text-align: center;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
     }
-    input[type=file] { color: #fff; }
-    button {
-      background: #00ff99; border: none;
-      padding: 10px 20px; border-radius: 8px;
-      cursor: pointer; font-weight: bold;
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
     }
-    a { color: #fff; margin-top: 15px; }
+    a {
+      text-decoration: none;
+      background: #007bff;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 10px;
+      transition: background 0.3s;
+    }
+    a:hover {
+      background: #0056b3;
+    }
   </style>
 </head>
 <body>
-  <h1>🚀 Upload ảnh hoặc video</h1>
-  <form action="/upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept="image/*,video/*" required>
-    <button type="submit">Tải lên</button>
-  </form>
-  <a href="/gallery">📂 Xem thư viện</a>
+  <div class="container">
+    <h1>Chào mừng đến với Bộ sưu tập ảnh 🌸</h1>
+    <a href="/gallery">Xem thư viện ảnh</a>
+  </div>
 </body>
 </html>
