@@ -1,134 +1,84 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>☁ Cloud Upload Portal</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload File</title>
   <style>
-    /* 🌈 Reset + layout */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #89f7fe, #66a6ff);
-      min-height: 100vh;
+      font-family: Poppins, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
     }
     .container {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(12px);
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      width: 90%;
-      max-width: 420px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 30px;
+      border-radius: 15px;
       text-align: center;
-      color: #fff;
-      animation: fadeIn 0.8s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    h2 {
-      font-weight: 600;
-      margin-bottom: 15px;
-      font-size: 1.8em;
-    }
-    p {
-      font-size: 0.95em;
-      margin-bottom: 20px;
-      opacity: 0.8;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 400px;
+      backdrop-filter: blur(10px);
     }
     input[type="file"] {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 10px;
-      border-radius: 8px;
-      color: #fff;
-      width: 100%;
-      cursor: pointer;
+      margin: 15px 0;
+      color: white;
     }
     button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
       background: #4CAF50;
+      border: none;
+      padding: 10px 20px;
       color: white;
-      font-size: 1em;
-      font-weight: 600;
+      border-radius: 8px;
       cursor: pointer;
       transition: 0.3s;
     }
-    button:hover {
-      background: #43a047;
-      transform: scale(1.02);
-    }
+    button:hover { background: #45a049; }
     #progressContainer {
-      margin-top: 20px;
       width: 100%;
-      background: rgba(255,255,255,0.2);
+      height: 20px;
+      background: #ddd;
       border-radius: 10px;
-      height: 10px;
       overflow: hidden;
       display: none;
+      margin-top: 10px;
     }
     #progressBar {
-      height: 100%;
       width: 0%;
-      background: #00e676;
-      border-radius: 10px;
-      transition: width 0.3s ease;
-    }
-    #result {
-      margin-top: 15px;
-      color: #fff;
-      font-size: 0.9em;
-      word-wrap: break-word;
+      height: 100%;
+      background: #4CAF50;
+      color: white;
+      font-size: 12px;
+      text-align: center;
     }
     a.btn {
       display: inline-block;
-      margin-top: 25px;
-      padding: 10px 18px;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: #fff;
-      border-radius: 10px;
+      margin-top: 15px;
+      background: #2196F3;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
       text-decoration: none;
-      font-weight: 500;
       transition: 0.3s;
     }
-    a.btn:hover {
-      background: rgba(255,255,255,0.25);
-      transform: translateY(-2px);
-    }
-    .footer {
-      margin-top: 20px;
-      font-size: 0.8em;
-      opacity: 0.7;
-    }
+    a.btn:hover { background: #1976D2; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>☁ Cloud Upload</h2>
-    <p>Tải ảnh hoặc video lên Flask của Billhaha1947.</p>
+    <h2>📤 Upload File</h2>
     <form id="uploadForm">
-      <input type="file" name="file" id="fileInput" required />
-      <button type="submit">📤 Tải lên</button>
+      <input type="file" name="file" id="fileInput" required>
+      <br>
+      <button type="submit">Tải lên</button>
     </form>
-
-    <div id="progressContainer">
-      <div id="progressBar"></div>
-    </div>
-
+    <div id="progressContainer"><div id="progressBar">0%</div></div>
     <div id="result"></div>
-
     <a href="/gallery" class="btn">📁 Xem thư viện</a>
-    <div class="footer">© 2025 Cloud Upload Portal</div>
   </div>
 
   <script>
@@ -137,44 +87,32 @@
     const progressBar = document.getElementById('progressBar');
     const result = document.getElementById('result');
 
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-
       const file = document.getElementById('fileInput').files[0];
       if (!file) return;
-
       const formData = new FormData();
       formData.append('file', file);
-
-      progressContainer.style.display = 'block';
-      progressBar.style.width = '0%';
-      result.textContent = '';
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/upload', true);
 
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressContainer.style.display = 'block';
           progressBar.style.width = percent + '%';
+          progressBar.textContent = percent + '%';
         }
       };
 
       xhr.onload = () => {
         if (xhr.status === 200) {
           const data = JSON.parse(xhr.responseText);
-          progressBar.style.width = '100%';
-          result.innerHTML = `
-            ✅ <strong>Tải lên thành công!</strong><br>
-            🔗 <a href="${data.url}" target="_blank" style="color:#fff;text-decoration:underline;">Xem file tại đây</a>
-          `;
+          result.innerHTML = `✅ Upload thành công!<br><a href="${data.url}" target="_blank">Xem file</a>`;
         } else {
           result.textContent = '❌ Lỗi tải lên!';
         }
-      };
-
-      xhr.onerror = () => {
-        result.textContent = '❌ Không thể kết nối tới server.';
       };
 
       xhr.send(formData);
