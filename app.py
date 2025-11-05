@@ -12,7 +12,7 @@ app = Flask(__name__)
 cloudinary.config(
     cloud_name="dma3eclgv",
     api_key="118974677734641",
-    api_secret="8Dhe37EYtXQVaaPpCsDlRRZSrE4"
+    api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4"
 )
 
 # Option B (thay thế): nếu bạn muốn dùng ENV vars thay hardcode,
