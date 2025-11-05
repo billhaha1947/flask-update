@@ -1,51 +1,51 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, url_for
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 import os
+from dotenv import load_dotenv
 
+# ---- Tải biến môi trường (.env) ----
+load_dotenv()
+
+# ---- Cấu hình Flask ----
 app = Flask(__name__)
 
-# ⚙️ Cấu hình Cloudinary
+# ---- Cấu hình Cloudinary ----
 cloudinary.config(
-    cloud_name=os.getenv("dma3eclgv"),
-    api_key=os.getenv("118974677734641"),
-    api_secret=os.getenv("8Dhe37EYtXQVaaPpCsDIRRZSrE4"),
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+# Kiểm tra log để chắc chắn biến môi trường đã đọc được
+print("✅ Cloudinary config loaded:", os.getenv("CLOUDINARY_CLOUD_NAME"))
 
+# ---- Trang chủ hiển thị gallery ----
+@app.route("/")
+def gallery():
+    # Danh sách ảnh mẫu hoặc từ Cloudinary
+    image_urls = [
+        "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+    ]
+    return render_template("gallery.html", images=image_urls)
+
+# ---- Upload ảnh mới ----
 @app.route("/upload", methods=["POST"])
 def upload():
-    file = request.files.get("file")
-    if not file:
-        return "No file", 400
+    if "file" not in request.files:
+        return "Không có file nào được tải lên", 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return "Chưa chọn file", 400
+
+    # Upload lên Cloudinary
     upload_result = cloudinary.uploader.upload(file)
-    return redirect("/gallery")
+    print("📤 Upload thành công:", upload_result["secure_url"])
 
-@app.route("/gallery")
-def gallery():
-    try:
-        result = cloudinary.api.resources(
-            type="upload",
-            prefix="",   # có thể thêm thư mục nếu cần
-            max_results=100
-        )
-        resources = result.get("resources", [])
-        return render_template("gallery.html", resources=resources)
-    except Exception as e:
-        return f"Lỗi tải gallery: {str(e)}", 500
+    return redirect(url_for("gallery"))
 
-@app.route("/delete/<public_id>", methods=["DELETE"])
-def delete(public_id):
-    try:
-        cloudinary.api.delete_resources([public_id])
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
+# ---- Chạy app ----
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", port=5000)
