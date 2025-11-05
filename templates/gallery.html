@@ -3,114 +3,125 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Thư viện ảnh</title>
+  <title>Thư viện Cloudinary</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-      text-align: center;
+      font-family: "Poppins", sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
     }
 
-    h1 {
-      color: #333;
+    header {
+      background: #3b82f6;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 15px;
+      top: 15px;
+      background: white;
+      color: #3b82f6;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #1e40af;
+      color: white;
     }
 
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-top: 30px;
+      gap: 12px;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
-    .gallery img {
-      width: 100%;
+    .card {
+      position: relative;
       border-radius: 10px;
-      transition: all 0.3s ease;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       cursor: pointer;
+      background: white;
+      transition: transform 0.2s ease;
     }
 
-    .gallery img:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
+    .card:hover { transform: scale(1.03); }
 
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
+    .card img, .card video {
       width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
+      height: 200px;
+      object-fit: cover;
+      display: block;
     }
 
-    .overlay img {
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .popup img, .popup video {
       max-width: 90%;
       max-height: 90%;
       border-radius: 10px;
-      animation: zoomIn 0.3s ease;
-    }
-
-    @keyframes zoomIn {
-      from { transform: scale(0.7); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .upload-form {
-      margin-top: 30px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
-    }
-
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0056b3;
     }
   </style>
 </head>
 <body>
-  <h1>📸 Thư viện ảnh Cloudinary</h1>
 
-  <form class="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
-    <input type="file" name="file" accept="image/*" required />
-    <button type="submit">Tải ảnh lên</button>
-  </form>
+  <header>
+    <a href="/" class="back-btn">⬅️ Quay lại</a>
+    <h1>📸 Thư viện Cloudinary</h1>
+  </header>
 
   <div class="gallery">
-    {% for img in images %}
-      <img src="{{ img }}" alt="Ảnh" onclick="showFull('{{ img }}')">
+    {% for res in resources %}
+      <div class="card" onclick="openPopup('{{ res.secure_url }}', '{{ res.resource_type }}')">
+        {% if res.resource_type == 'video' %}
+          <video muted playsinline loop>
+            <source src="{{ res.secure_url }}" type="video/mp4">
+          </video>
+        {% else %}
+          <img src="{{ res.secure_url }}" alt="Ảnh">
+        {% endif %}
+      </div>
     {% endfor %}
   </div>
 
-  <div class="overlay" id="overlay" onclick="hideFull()">
-    <img id="fullImage" src="">
+  <div class="popup" id="popup" onclick="closePopup()">
+    <div id="popup-content"></div>
   </div>
 
   <script>
-    function showFull(src) {
-      const overlay = document.getElementById('overlay');
-      const fullImg = document.getElementById('fullImage');
-      fullImg.src = src;
-      overlay.style.display = 'flex';
+    function openPopup(url, type) {
+      const popup = document.getElementById("popup");
+      const content = document.getElementById("popup-content");
+      content.innerHTML = type === "video"
+        ? `<video src="${url}" controls autoplay></video>`
+        : `<img src="${url}" alt="Ảnh">`;
+      popup.style.display = "flex";
     }
 
-    function hideFull() {
-      document.getElementById('overlay').style.display = 'none';
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
     }
   </script>
+
 </body>
 </html>
