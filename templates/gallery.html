@@ -1,155 +1,229 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📸 Thư viện Cloudinary</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background: #f4f6f9;
-      font-family: "Segoe UI", Roboto, sans-serif;
+      font-family: "Inter", sans-serif;
       margin: 0;
-      padding: 0;
+      background-color: #f4f6f8;
+      overflow-x: hidden;
     }
 
     h1 {
-      background: #007bff;
-      color: white;
       text-align: center;
+      background-color: #007bff;
+      color: white;
       padding: 15px 0;
       margin: 0;
       font-size: 22px;
-      border-bottom: 4px solid #0056b3;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
     .back-btn {
       display: block;
       width: fit-content;
-      margin: 15px auto;
+      margin: 20px auto;
       background: #28a745;
       color: white;
-      text-decoration: none;
       padding: 10px 20px;
+      border: none;
       border-radius: 10px;
-      transition: 0.2s;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
     }
-    .back-btn:hover { background: #1e7e34; }
 
-    /* 🧱 Lưới ảnh 3 cột cố định */
-    .gallery-grid {
+    /* --- GRID 3 cột --- */
+    .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 10px;
-      padding: 10px 15px 40px;
-      max-width: 1000px;
-      margin: 0 auto;
+      padding: 0 10px 50px;
     }
 
     .card {
       position: relative;
-      background: #fff;
-      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border-radius: 14px;
+      background: white;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      transition: transform 0.25s ease;
     }
 
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      transform: scale(1.04);
     }
 
-    /* 🖼️ Ảnh hiển thị đầy đủ, bo góc */
-    .card img, .card video {
+    .card img,
+    .card video {
       width: 100%;
-      height: 180px;
+      height: 120px;
       object-fit: cover;
-      background: #000;
       display: block;
+      cursor: pointer;
+      transition: transform 0.25s ease;
     }
 
-    /* 🗑️ Nút xóa */
+    .card:hover img {
+      transform: scale(1.05);
+    }
+
     .delete-btn {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255, 0, 0, 0.85);
+      top: 6px;
+      right: 6px;
+      background: red;
       color: white;
       border: none;
       border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: 0.2s;
+      transition: transform 0.2s ease;
     }
 
     .delete-btn:hover {
-      background: red;
+      background: darkred;
       transform: scale(1.1);
     }
 
-    footer {
-      text-align: center;
-      margin-top: 20px;
-      padding-bottom: 20px;
-      color: #777;
-      font-size: 13px;
+    /* --- Popup --- */
+    .popup {
+      visibility: hidden;
+      opacity: 0;
+      position: fixed;
+      z-index: 999;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
     }
 
-    @media (max-width: 600px) {
-      .card img, .card video {
-        height: 140px;
-      }
+    .popup.show {
+      visibility: visible;
+      opacity: 1;
     }
+
+    .popup-content {
+      position: relative;
+      animation: zoomIn 0.4s ease;
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .popup img, .popup video {
+      max-width: 95%;
+      max-height: 90%;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: -40px;
+      right: -10px;
+      color: white;
+      font-size: 32px;
+      text-decoration: none;
+      font-weight: bold;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
   </style>
 </head>
 <body>
+
   <h1>📸 Thư viện Cloudinary</h1>
+
   <a href="/" class="back-btn">⬅️ Quay lại Upload</a>
 
-  <div class="gallery-grid">
+  <div class="gallery">
     {% for res in resources %}
-      <div class="card">
+      <div class="card" onclick="openPopup('{{ res.secure_url }}', '{{ res.resource_type }}')">
         {% if res.resource_type == "video" %}
-          <video controls>
+          <video muted>
             <source src="{{ res.secure_url }}" type="video/mp4">
           </video>
         {% else %}
           <img src="{{ res.secure_url }}" alt="Ảnh">
         {% endif %}
-        <button class="delete-btn" onclick="deleteFile('{{ res.public_id }}')">🗑️</button>
+        <button class="delete-btn" onclick="event.stopPropagation(); deleteFile('{{ res.public_id }}')">🗑️</button>
       </div>
     {% endfor %}
   </div>
 
-  <footer>
-    🚀 Flask + Cloudinary — Giao diện dạng lưới 3 cột hiện đại
-  </footer>
+  <!-- Popup container -->
+  <div id="popup" class="popup" onclick="closePopup(event)">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePopup(event)">&times;</span>
+      <img id="popup-img" src="" alt="Ảnh lớn" style="display:none;">
+      <video id="popup-video" controls autoplay style="display:none;"></video>
+    </div>
+  </div>
 
   <script>
-    async function deleteFile(public_id) {
-      const password = prompt("🔐 Nhập mật khẩu admin để xóa:");
-      if (!password) return;
+    function deleteFile(publicId) {
+      if (confirm("Xóa file này?")) {
+        fetch(`/delete/${publicId}`, { method: "DELETE" })
+          .then(res => {
+            if (res.ok) location.reload();
+            else alert("Không thể xóa file.");
+          });
+      }
+    }
 
-      const res = await fetch(`/api/delete/${public_id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password })
-      });
+    const popup = document.getElementById("popup");
+    const popupImg = document.getElementById("popup-img");
+    const popupVideo = document.getElementById("popup-video");
 
-      const data = await res.json();
-      if (data.result === "ok") {
-        alert("🗑️ Đã xóa thành công!");
-        location.reload();
+    function openPopup(url, type) {
+      popup.classList.add("show");
+      if (type === "video") {
+        popupVideo.src = url;
+        popupVideo.style.display = "block";
+        popupImg.style.display = "none";
       } else {
-        alert("❌ Xóa thất bại hoặc sai mật khẩu!");
+        popupImg.src = url;
+        popupImg.style.display = "block";
+        popupVideo.style.display = "none";
+      }
+    }
+
+    function closePopup(event) {
+      if (event.target === popup || event.target.classList.contains('close-btn')) {
+        popup.classList.remove("show");
+        popupImg.src = "";
+        popupVideo.pause();
+        popupVideo.src = "";
       }
     }
   </script>
+
 </body>
 </html>
