@@ -6,68 +6,78 @@
   <title>📸 Thư viện Cloudinary</title>
   <style>
     body {
-      background: #f0f2f5;
+      background: #f4f6f9;
       font-family: "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 0;
-      text-align: center;
     }
 
     h1 {
-      background: #28a745;
+      background: #007bff;
       color: white;
+      text-align: center;
+      padding: 15px 0;
       margin: 0;
-      padding: 15px;
       font-size: 22px;
-      border-bottom: 4px solid #1e7e34;
+      border-bottom: 4px solid #0056b3;
     }
 
     .back-btn {
-      display: inline-block;
+      display: block;
+      width: fit-content;
       margin: 15px auto;
-      background: #007bff;
+      background: #28a745;
       color: white;
       text-decoration: none;
       padding: 10px 20px;
       border-radius: 10px;
       transition: 0.2s;
     }
-    .back-btn:hover { background: #0056b3; }
+    .back-btn:hover { background: #1e7e34; }
 
-    .gallery-container {
-      max-width: 700px;
+    /* 🧩 Lưới ảnh 3 cột */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 10px 20px 40px;
+      max-width: 1000px;
       margin: 0 auto;
-      padding: 10px;
     }
 
     .card {
       position: relative;
       background: white;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+      border-radius: 15px;
       overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
 
     .card img, .card video {
       width: 100%;
-      height: auto; /* ✅ Giữ đúng tỉ lệ gốc */
-      object-fit: contain; /* ✅ Không crop */
-      display: block;
+      height: auto;
+      object-fit: contain;
       background: #000;
+      display: block;
     }
 
     .delete-btn {
       position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: red;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 0, 0, 0.85);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 42px;
-      height: 42px;
-      font-size: 20px;
+      width: 38px;
+      height: 38px;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -77,14 +87,24 @@
     }
 
     .delete-btn:hover {
-      background: darkred;
+      background: red;
       transform: scale(1.1);
     }
 
     footer {
-      margin-top: 30px;
+      text-align: center;
+      margin-top: 20px;
+      padding-bottom: 20px;
       color: #777;
       font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .delete-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+      }
     }
   </style>
 </head>
@@ -92,7 +112,7 @@
   <h1>📸 Thư viện Cloudinary</h1>
   <a href="/" class="back-btn">⬅️ Quay lại Upload</a>
 
-  <div class="gallery-container">
+  <div class="gallery-grid">
     {% for res in resources %}
       <div class="card">
         {% if res.resource_type == "video" %}
@@ -108,7 +128,7 @@
   </div>
 
   <footer>
-    🚀 Ứng dụng Flask + Cloudinary — Giao diện hiện đại, hỗ trợ ảnh & video
+    🚀 Flask + Cloudinary — Giao diện dạng lưới hiện đại, hỗ trợ ảnh & video
   </footer>
 
   <script>
