@@ -3,115 +3,133 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thư viện Cloudinary</title>
+  <title>📸 Thư viện Cloudinary</title>
   <style>
     body {
-      font-family: Poppins, sans-serif;
-      background: #f5f7fa;
+      background: #f0f2f5;
+      font-family: "Segoe UI", Roboto, sans-serif;
       margin: 0;
-    }
-    h2 {
+      padding: 0;
       text-align: center;
-      background: #4CAF50;
+    }
+
+    h1 {
+      background: #28a745;
       color: white;
-      padding: 20px 0;
       margin: 0;
+      padding: 15px;
+      font-size: 22px;
+      border-bottom: 4px solid #1e7e34;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px;
-      padding: 20px;
+
+    .back-btn {
+      display: inline-block;
+      margin: 15px auto;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      transition: 0.2s;
     }
-    .item {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
+    .back-btn:hover { background: #0056b3; }
+
+    .gallery-container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .card {
       position: relative;
-      transition: transform 0.2s;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      overflow: hidden;
     }
-    .item:hover { transform: scale(1.02); }
-    img, video {
+
+    .card img, .card video {
       width: 100%;
-      height: 200px;
-      object-fit: cover;
+      height: auto; /* ✅ Giữ đúng tỉ lệ gốc */
+      object-fit: contain; /* ✅ Không crop */
+      display: block;
+      background: #000;
     }
+
     .delete-btn {
       position: absolute;
       bottom: 10px;
       right: 10px;
-      background: rgba(255,0,0,0.8);
+      background: red;
       color: white;
       border: none;
       border-radius: 50%;
-      width: 35px;
-      height: 35px;
+      width: 42px;
+      height: 42px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      font-size: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: 0.2s;
     }
-    .delete-btn:hover { background: red; }
-    a.back {
-      display: inline-block;
-      margin: 20px;
-      padding: 10px 20px;
-      background: #2196F3;
-      color: white;
-      border-radius: 8px;
-      text-decoration: none;
+
+    .delete-btn:hover {
+      background: darkred;
+      transform: scale(1.1);
+    }
+
+    footer {
+      margin-top: 30px;
+      color: #777;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
-  <h2>📸 Thư viện Cloudinary</h2>
-  <a href="/" class="back">⬅ Quay lại Upload</a>
-  <div id="gallery" class="grid"></div>
+  <h1>📸 Thư viện Cloudinary</h1>
+  <a href="/" class="back-btn">⬅️ Quay lại Upload</a>
+
+  <div class="gallery-container">
+    {% for res in resources %}
+      <div class="card">
+        {% if res.resource_type == "video" %}
+          <video controls>
+            <source src="{{ res.secure_url }}" type="video/mp4">
+          </video>
+        {% else %}
+          <img src="{{ res.secure_url }}" alt="Ảnh">
+        {% endif %}
+        <button class="delete-btn" onclick="deleteFile('{{ res.public_id }}')">🗑️</button>
+      </div>
+    {% endfor %}
+  </div>
+
+  <footer>
+    🚀 Ứng dụng Flask + Cloudinary — Giao diện hiện đại, hỗ trợ ảnh & video
+  </footer>
 
   <script>
-    async function loadGallery() {
-      const res = await fetch('/api/gallery');
-      const data = await res.json();
-      const container = document.getElementById('gallery');
-      container.innerHTML = '';
-
-      data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        if (item.type === 'video') {
-          div.innerHTML = `<video controls src="${item.url}"></video>`;
-        } else {
-          div.innerHTML = `<img src="${item.url}" alt="file">`;
-        }
-        const btn = document.createElement('button');
-        btn.className = 'delete-btn';
-        btn.innerHTML = '🗑️';
-        btn.onclick = () => deleteFile(item.public_id);
-        div.appendChild(btn);
-        container.appendChild(div);
-      });
-    }
-
-    function deleteFile(public_id) {
-      const password = prompt("Nhập mật khẩu admin để xóa:");
+    async function deleteFile(public_id) {
+      const password = prompt("🔐 Nhập mật khẩu admin để xóa:");
       if (!password) return;
 
-      fetch(`/api/delete/${public_id}`, {
+      const res = await fetch(`/api/delete/${public_id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.result === "ok") {
-          alert("🗑️ Đã xóa thành công!");
-          loadGallery();
-        } else {
-          alert(data.error || "❌ Không thể xóa!");
-        }
       });
-    }
 
-    loadGallery();
+      const data = await res.json();
+      if (data.result === "ok") {
+        alert("🗑️ Đã xóa thành công!");
+        location.reload();
+      } else {
+        alert("❌ Xóa thất bại hoặc sai mật khẩu!");
+      }
+    }
   </script>
 </body>
 </html>
