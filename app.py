@@ -1,8 +1,7 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, jsonify, render_template
 import cloudinary
 import cloudinary.uploader
 from cloudinary import Search
-import os
 
 app = Flask(__name__)
 
@@ -13,13 +12,10 @@ cloudinary.config(
     api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4"
 )
 
-# 🏠 Trang upload chính (render index.html)
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
-# 📤 API nhận file upload
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
@@ -30,7 +26,7 @@ def upload_file():
         if file.filename == '':
             return jsonify({'error': 'Tên file trống.'}), 400
 
-        # ⚡ Upload lên Cloudinary (tự nhận ảnh hoặc video)
+        # ⚡ Upload lên Cloudinary (hỗ trợ ảnh + video)
         upload_result = cloudinary.uploader.upload(file, resource_type="auto")
 
         return jsonify({
@@ -39,10 +35,10 @@ def upload_file():
         })
 
     except Exception as e:
+        print("❌ Lỗi upload:", e)
         return jsonify({'error': str(e)}), 500
 
 
-# 🖼 Trang thư viện ảnh/video
 @app.route('/gallery')
 def gallery():
     try:
@@ -84,13 +80,11 @@ def gallery():
                 html += f'<div class="item"><img src="{url}" alt="file"></div>'
 
         html += "</div></body></html>"
-
         return html
 
     except Exception as e:
+        print("❌ Lỗi gallery:", e)
         return f"<h3 style='color:red;'>❌ Lỗi lấy dữ liệu: {str(e)}</h3>"
 
-
 if __name__ == '__main__':
-    # ⚙ chạy Flask
     app.run(debug=True)
