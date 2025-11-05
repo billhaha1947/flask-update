@@ -2,45 +2,86 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thư viện ảnh</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      color: #fff;
-      margin: 0; padding: 20px;
-      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
     }
-    h1 { margin-bottom: 20px; }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 15px;
+      margin-top: 20px;
     }
-    .gallery img, .gallery video {
+    .gallery img {
       width: 100%;
-      border-radius: 10px;
-      transition: transform 0.3s ease;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      transition: transform 0.3s ease, filter 0.3s;
       cursor: pointer;
     }
-    .gallery img:hover, .gallery video:hover {
+    .gallery img:hover {
       transform: scale(1.05);
+      filter: brightness(1.1);
     }
-    a { color: #00ff99; display: inline-block; margin-top: 20px; }
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease, visibility 0.4s;
+    }
+    .overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+    .overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+      transition: transform 0.4s ease;
+    }
   </style>
 </head>
 <body>
-  <h1>📁 Thư viện ảnh</h1>
-  <a href="/">⬅ Quay lại Upload</a>
-
+  <h1>📸 Bộ sưu tập ảnh</h1>
   <div class="gallery">
-    {% for item in media %}
-      {% if 'image' in item.resource_type %}
-        <img src="{{ item.secure_url }}" alt="Ảnh">
-      {% elif 'video' in item.resource_type %}
-        <video src="{{ item.secure_url }}" controls></video>
-      {% endif %}
+    {% for img in images %}
+      <img src="{{ img }}" alt="Ảnh">
     {% endfor %}
   </div>
+
+  <div class="overlay" id="overlay">
+    <img id="overlay-img" src="" alt="">
+  </div>
+
+  <script>
+    const overlay = document.getElementById('overlay');
+    const overlayImg = document.getElementById('overlay-img');
+    document.querySelectorAll('.gallery img').forEach(img => {
+      img.addEventListener('click', () => {
+        overlayImg.src = img.src;
+        overlay.classList.add('active');
+        overlayImg.style.transform = 'scale(0.9)';
+        setTimeout(() => overlayImg.style.transform = 'scale(1)', 10);
+      });
+    });
+    overlay.addEventListener('click', () => overlay.classList.remove('active'));
+  </script>
 </body>
 </html>
