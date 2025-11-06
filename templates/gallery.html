@@ -1,64 +1,96 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>📸 Thư viện Cloudinary</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Thư viện — Video fix</title>
   <style>
-    body { font-family: Poppins, sans-serif; background:#f4f6f9; margin:0; }
-    h1 { text-align:center; background:#4A90E2; color:white; padding:15px; margin:0; }
-    .back-btn { display:block; margin:10px auto; text-align:center; text-decoration:none; color:white; background:#28a745; padding:8px 16px; border-radius:8px; width:120px; }
-    .gallery-container {
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap:15px; padding:15px;
-    }
-    .card {
-      position:relative; overflow:hidden;
-      border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.2);
-      transition:transform 0.2s;
-      cursor:pointer;
-    }
-    .card:hover { transform:scale(1.05); }
-    .card img, .card video { width:100%; height:160px; object-fit:cover; display:block; }
-    .delete-btn {
-      position:absolute; top:8px; right:8px; background:red;
-      color:white; border:none; border-radius:50%; width:30px; height:30px;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer; font-weight:bold;
-    }
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f9;margin:0;padding:20px;color:#222}
+    h1{text-align:center;margin:8px 0 18px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:1200px;margin:0 auto}
+    .card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.08);position:relative}
+    .media{width:100%;height:200px;object-fit:cover;display:block}
+    .controls{padding:10px;display:flex;justify-content:space-between;align-items:center}
+    .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn-delete{background:#e53e3e;color:white}
+    .btn-open{background:#3182ce;color:white}
+    .popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);align-items:center;justify-content:center;z-index:999}
+    .popup.active{display:flex}
+    .popup-content{max-width:96%;max-height:96%}
+    .popup-content video,.popup-content img{max-width:100%;max-height:100%;border-radius:8px;display:block}
   </style>
 </head>
 <body>
-
-<h1>📸 Thư viện Cloudinary</h1>
-<a href="/" class="back-btn">⬅️ Upload</a>
-
-<div class="gallery-container">
-  {% for res in resources %}
-  <div class="card">
-    {% if res.resource_type == 'video' %}
-      <video muted loop playsinline><source src="{{ res.secure_url }}" type="video/mp4"></video>
-    {% else %}
-      <img src="{{ res.secure_url }}" alt="Ảnh">
-    {% endif %}
-    <button class="delete-btn" onclick="deleteFile('{{ res.public_id }}')">🗑️</button>
+  <h1>📁 Thư viện (image + video)</h1>
+  <div class="grid">
+    {% for f in files %}
+      <div class="card">
+        {% if f.type == 'image' %}
+          <img class="media" src="{{ f.url }}" alt="">
+        {% elif f.type == 'video' %}
+          <!-- video preview muted autoplay loop (preview only) -->
+          <video class="media" muted loop playsinline preload="metadata">
+            <source src="{{ f.url }}" type="video/mp4">
+            Trình duyệt không hỗ trợ video.
+          </video>
+        {% else %}
+          <a href="{{ f.url }}" target="_blank" style="display:block;padding:40px;text-align:center">Mở file ({{ f.format }})</a>
+        {% endif %}
+        <div class="controls">
+          <button class="btn btn-open" onclick="openPopup('{{ f.url }}','{{ f.type }}')">Xem</button>
+          <button class="btn btn-delete" onclick="onDelete('{{ f.public_id }}')">Xóa</button>
+        </div>
+      </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>
 
-<script>
-async function deleteFile(publicId) {
-  const password = prompt("🔒 Nhập mật khẩu admin để xoá:");
-  if (!password) return;
-  const res = await fetch(`/delete/${publicId}?password=${password}`, { method: "DELETE" });
-  const data = await res.json();
-  if (data.success) {
-    alert("🗑️ Đã xoá!");
-    location.reload();
-  } else {
-    alert("❌ Lỗi: " + (data.error || "Không xoá được"));
-  }
-}
-</script>
+  <div id="popup" class="popup" onclick="closePopup()">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <img id="popupImg" src="" style="display:none">
+      <video id="popupVid" controls style="display:none"></video>
+    </div>
+  </div>
+
+  <script>
+    function openPopup(url, type){
+      const popup = document.getElementById('popup');
+      const img = document.getElementById('popupImg');
+      const vid = document.getElementById('popupVid');
+      if(type === 'video'){
+        vid.src = url;
+        vid.style.display = 'block';
+        img.style.display = 'none';
+      } else {
+        img.src = url;
+        img.style.display = 'block';
+        vid.style.display = 'none';
+        vid.pause();
+        vid.src = '';
+      }
+      popup.classList.add('active');
+    }
+    function closePopup(){
+      const popup = document.getElementById('popup');
+      const vid = document.getElementById('popupVid');
+      popup.classList.remove('active');
+      vid.pause();
+      vid.src = '';
+    }
+
+    async function onDelete(publicId){
+      const pw = prompt('Nhập mật khẩu admin để xóa:');
+      if(!pw) return;
+      const res = await fetch(`/delete/${publicId}?password=${encodeURIComponent(pw)}`, { method: 'DELETE' });
+      const j = await res.json();
+      if(res.ok && (j.result == 'ok' || j.result == 'not_found' || j.result == 'ok')) {
+        alert('Đã xóa');
+        location.reload();
+      } else if(j.error) {
+        alert('Lỗi: ' + j.error);
+      } else {
+        alert('Không xóa được');
+      }
+    }
+  </script>
 </body>
 </html>
