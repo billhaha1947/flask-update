@@ -2,147 +2,63 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📸 Thư viện Cloudinary</title>
   <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      margin: 0;
-      padding: 0;
-      text-align: center;
+    body { font-family: Poppins, sans-serif; background:#f4f6f9; margin:0; }
+    h1 { text-align:center; background:#4A90E2; color:white; padding:15px; margin:0; }
+    .back-btn { display:block; margin:10px auto; text-align:center; text-decoration:none; color:white; background:#28a745; padding:8px 16px; border-radius:8px; width:120px; }
+    .gallery-container {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap:15px; padding:15px;
     }
-
-    h1 {
-      margin: 20px 0;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 15px;
-      padding: 20px;
-      max-width: 1200px;
-      margin: auto;
-    }
-
     .card {
-      background: rgba(255,255,255,0.1);
-      border-radius: 15px;
-      padding: 10px;
-      position: relative;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      overflow: hidden;
-      transition: 0.3s;
+      position:relative; overflow:hidden;
+      border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.2);
+      transition:transform 0.2s;
+      cursor:pointer;
     }
-
-    .card:hover {
-      transform: scale(1.05);
-    }
-
-    img, video {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-
+    .card:hover { transform:scale(1.05); }
+    .card img, .card video { width:100%; height:160px; object-fit:cover; display:block; }
     .delete-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: red;
-      border: none;
-      color: white;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      font-size: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: 0.3s;
-    }
-
-    .delete-btn:hover { background: darkred; }
-
-    a.btn {
-      display: inline-block;
-      background: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      margin: 20px;
-      transition: 0.3s;
-    }
-
-    a.btn:hover { background: #45a049; }
-
-    .popup {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .popup-content {
-      max-width: 90%;
-      max-height: 90%;
-    }
-
-    .popup img, .popup video {
-      width: 100%;
-      height: auto;
-      border-radius: 10px;
+      position:absolute; top:8px; right:8px; background:red;
+      color:white; border:none; border-radius:50%; width:30px; height:30px;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-weight:bold;
     }
   </style>
 </head>
 <body>
-  <h1>📁 Thư viện Ảnh & Video</h1>
-  <a href="/" class="btn">⬅️ Quay lại Upload</a>
-  <div class="gallery">
-    {% for f in files %}
-      <div class="card" onclick="openPopup('{{ f.secure_url }}', '{{ f.resource_type }}')">
-        {% if f.resource_type == 'video' %}
-          <video muted loop playsinline><source src="{{ f.secure_url }}" type="video/mp4"></video>
-        {% else %}
-          <img src="{{ f.secure_url }}" alt="Ảnh Cloudinary">
-        {% endif %}
-        <button class="delete-btn" onclick="event.stopPropagation(); deleteFile('{{ f.public_id }}')">🗑️</button>
-      </div>
-    {% endfor %}
+
+<h1>📸 Thư viện Cloudinary</h1>
+<a href="/" class="back-btn">⬅️ Upload</a>
+
+<div class="gallery-container">
+  {% for res in resources %}
+  <div class="card">
+    {% if res.resource_type == 'video' %}
+      <video muted loop playsinline><source src="{{ res.secure_url }}" type="video/mp4"></video>
+    {% else %}
+      <img src="{{ res.secure_url }}" alt="Ảnh">
+    {% endif %}
+    <button class="delete-btn" onclick="deleteFile('{{ res.public_id }}')">🗑️</button>
   </div>
+  {% endfor %}
+</div>
 
-  <div class="popup" id="popup" onclick="closePopup()">
-    <div class="popup-content" id="popup-content"></div>
-  </div>
-
-  <script>
-    function openPopup(url, type) {
-      const popup = document.getElementById("popup");
-      const content = document.getElementById("popup-content");
-      content.innerHTML = type === "video"
-        ? `<video src="${url}" controls autoplay></video>`
-        : `<img src="${url}" alt="Ảnh gốc">`;
-      popup.style.display = "flex";
-    }
-
-    function closePopup() {
-      document.getElementById("popup").style.display = "none";
-    }
-
-    async function deleteFile(publicId) {
-      if (!confirm("Xóa file này?")) return;
-      const res = await fetch(`/delete/${publicId}`, { method: "DELETE" });
-      if (res.ok) location.reload();
-    }
-  </script>
+<script>
+async function deleteFile(publicId) {
+  const password = prompt("🔒 Nhập mật khẩu admin để xoá:");
+  if (!password) return;
+  const res = await fetch(`/delete/${publicId}?password=${password}`, { method: "DELETE" });
+  const data = await res.json();
+  if (data.success) {
+    alert("🗑️ Đã xoá!");
+    location.reload();
+  } else {
+    alert("❌ Lỗi: " + (data.error || "Không xoá được"));
+  }
+}
+</script>
 </body>
 </html>
