@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Thư viện ảnh & video</title>
+    <title>📚 Thư viện ảnh & video học sinh</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <style>
         body {
-            background: linear-gradient(180deg, #d9ebff, #ffffff);
+            background: linear-gradient(180deg, #e7f0ff, #ffffff);
             font-family: "Poppins", sans-serif;
         }
         h1 {
@@ -19,28 +19,30 @@
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 10px;
+            gap: 12px;
         }
         .item {
             position: relative;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
             transition: transform 0.2s ease-in-out;
         }
         .item:hover {
-            transform: scale(1.02);
+            transform: scale(1.03);
         }
         .item img, .item video {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            border-radius: 10px;
+            border-radius: 12px;
         }
         .delete-btn {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: rgba(255, 50, 50, 0.9);
+            bottom: 6px;
+            right: 6px;
+            background: rgba(255, 60, 60, 0.9);
             color: white;
             border: none;
             border-radius: 8px;
@@ -66,28 +68,65 @@
             background-color: #0844a4;
             color: white;
         }
+
+        /* Overlay hiển thị ảnh/video */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .overlay-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            text-align: center;
+        }
+        .overlay-content img, .overlay-content video {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+        .close-btn {
+            position: absolute;
+            top: -35px;
+            right: 0;
+            background: #ff5050;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container py-4">
         <div class="top-bar">
-            <h1>📁 Thư viện ảnh & video</h1>
+            <h1>📁 Thư viện ảnh & video học sinh</h1>
             <a href="/" class="btn-back">⬅ Về Upload</a>
         </div>
 
         {% if resources %}
         <div class="gallery-grid">
             {% for item in resources %}
-            <div class="item">
+            <div class="item" onclick="openOverlay('{{ item.secure_url }}', '{{ item.resource_type }}')">
                 {% if item.resource_type == 'video' %}
-                    <video controls>
+                    <video muted>
                         <source src="{{ item.secure_url }}" type="video/mp4">
-                        Trình duyệt của bạn không hỗ trợ video.
                     </video>
                 {% else %}
                     <img src="{{ item.secure_url }}" alt="media">
                 {% endif %}
-                <button class="delete-btn" onclick="deleteItem('{{ item.public_id }}')">🗑</button>
+                <button class="delete-btn" onclick="event.stopPropagation(); deleteItem('{{ item.public_id }}')">🗑</button>
             </div>
             {% endfor %}
         </div>
@@ -96,7 +135,40 @@
         {% endif %}
     </div>
 
+    <!-- Overlay xem ảnh/video -->
+    <div id="overlay" class="overlay" onclick="closeOverlay()">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeOverlay()">×</button>
+            <img id="overlayImg" style="display:none;">
+            <video id="overlayVideo" controls style="display:none;"></video>
+        </div>
+    </div>
+
     <script>
+        // Hiển thị ảnh/video khi bấm
+        function openOverlay(url, type) {
+            const overlay = document.getElementById("overlay");
+            const img = document.getElementById("overlayImg");
+            const vid = document.getElementById("overlayVideo");
+            if (type === "video") {
+                vid.src = url;
+                vid.style.display = "block";
+                img.style.display = "none";
+            } else {
+                img.src = url;
+                img.style.display = "block";
+                vid.style.display = "none";
+            }
+            overlay.style.display = "flex";
+        }
+
+        function closeOverlay() {
+            const overlay = document.getElementById("overlay");
+            const vid = document.getElementById("overlayVideo");
+            vid.pause();
+            overlay.style.display = "none";
+        }
+
         async function deleteItem(public_id) {
             const password = prompt("🔐 Nhập mật khẩu để xóa:");
             if (!password) return;
