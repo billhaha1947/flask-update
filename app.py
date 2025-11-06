@@ -7,9 +7,9 @@ app = Flask(__name__)
 
 # ⚡ CẤU HÌNH CLOUDINARY (thay thông tin của bạn vào đây)
 cloudinary.config(
-    cloud_name="ten_cloud_cua_ban",
-    api_key="123456789012345",
-    api_secret="abcdefghiABCDEFGHIJKLMN"
+    cloud_name="dma3eclgv",
+    api_key="118974677734641",
+    api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4"
 )
 
 # 🔐 MẬT KHẨU ADMIN XOÁ FILE
