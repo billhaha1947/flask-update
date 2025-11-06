@@ -80,7 +80,10 @@
             {% for item in resources %}
             <div class="item">
                 {% if item.resource_type == 'video' %}
-                    <video controls src="{{ item.secure_url }}"></video>
+                    <video controls>
+                        <source src="{{ item.secure_url }}" type="video/mp4">
+                        Trình duyệt của bạn không hỗ trợ video.
+                    </video>
                 {% else %}
                     <img src="{{ item.secure_url }}" alt="media">
                 {% endif %}
