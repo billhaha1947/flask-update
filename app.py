@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # 🌩️ CẤU HÌNH CLOUDINARY TRỰC TIẾP (bảo mật + HTTPS)
 cloudinary.config(
-    cloud_name="dma3e1gv",               # Thay bằng cloud_name của bạn
+    cloud_name="dma3eclgv",               # Thay bằng cloud_name của bạn
     api_key="118974677734641",           # Thay bằng api_key của bạn
     api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4",  # Thay bằng api_secret thật
     secure=True                          # ⚡ Bắt buộc để dùng HTTPS
