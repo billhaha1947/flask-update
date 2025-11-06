@@ -3,124 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload lên Cloudinary</title>
+  <title>📤 Upload File</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #007bff, #00c6ff);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
       height: 100vh;
-      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
     }
-
-    h1 {
-      margin-bottom: 20px;
-      font-size: 2em;
-    }
-
-    .upload-box {
-      background: rgba(255,255,255,0.15);
+    .container {
+      background: rgba(255, 255, 255, 0.15);
       padding: 30px;
-      border-radius: 20px;
+      border-radius: 15px;
       text-align: center;
-      width: 320px;
       backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 400px;
     }
-
     input[type="file"] {
-      margin-top: 10px;
-      background: #fff;
-      color: #333;
-      border-radius: 8px;
-      padding: 10px;
-      width: 100%;
+      margin: 15px 0;
+      color: white;
     }
-
     button {
-      margin-top: 15px;
-      padding: 10px 25px;
-      background: #fff;
-      color: #007bff;
-      font-weight: bold;
+      background: #4CAF50;
       border: none;
-      border-radius: 50px;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 8px;
       cursor: pointer;
       transition: 0.3s;
     }
-
-    button:hover {
-      background: #007bff;
-      color: white;
-    }
-
-    .progress {
+    button:hover { background: #45a049; }
+    #progressContainer {
       width: 100%;
-      background: rgba(255,255,255,0.2);
+      height: 20px;
+      background: #ddd;
       border-radius: 10px;
-      margin-top: 15px;
       overflow: hidden;
+      display: none;
+      margin-top: 10px;
     }
-
-    .progress-bar {
-      height: 10px;
+    #progressBar {
       width: 0%;
-      background: #00ff99;
-      transition: width 0.3s ease;
+      height: 100%;
+      background: #4CAF50;
+      color: white;
+      font-size: 12px;
+      text-align: center;
     }
-
-    a {
+    #result {
+      margin-top: 10px;
       color: #fff;
-      margin-top: 15px;
-      display: block;
+      word-break: break-all;
     }
+    a.btn {
+      display: inline-block;
+      margin-top: 15px;
+      background: #2196F3;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    a.btn:hover { background: #1976D2; }
   </style>
 </head>
 <body>
-
-  <div class="upload-box">
-    <h1>📤 Upload lên Cloudinary</h1>
-    <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
-      <input type="file" name="file" required><br>
+  <div class="container">
+    <h2>📤 Upload File</h2>
+    <form id="uploadForm">
+      <input type="file" name="file" id="fileInput" required>
+      <br>
       <button type="submit">Tải lên</button>
-      <div class="progress">
-        <div class="progress-bar" id="progressBar"></div>
-      </div>
     </form>
-    <a href="/gallery">➡️ Xem thư viện</a>
+    <div id="progressContainer"><div id="progressBar">0%</div></div>
+    <div id="result"></div>
+    <a href="/gallery" class="btn">📁 Xem thư viện</a>
   </div>
 
   <script>
-    const form = document.getElementById("uploadForm");
-    const progressBar = document.getElementById("progressBar");
+    const form = document.getElementById('uploadForm');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const result = document.getElementById('result');
 
-    form.addEventListener("submit", function(event) {
-      event.preventDefault();
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const file = document.getElementById('fileInput').files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
       const xhr = new XMLHttpRequest();
-      const formData = new FormData(form);
+      xhr.open('POST', '/upload', true);
 
-      xhr.upload.addEventListener("progress", function(e) {
+      xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
-          const percent = (e.loaded / e.total) * 100;
-          progressBar.style.width = percent + "%";
-        }
-      });
-
-      xhr.onload = function() {
-        if (xhr.status === 200) {
-          window.location.href = "/gallery";
-        } else {
-          alert("Lỗi upload: " + xhr.responseText);
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressContainer.style.display = 'block';
+          progressBar.style.width = percent + '%';
+          progressBar.textContent = percent + '%';
         }
       };
 
-      xhr.open("POST", "/upload");
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          result.innerHTML = `✅ Upload thành công!<br><a href="${data.url}" target="_blank" style="color:#00ffcc;">Xem file</a>`;
+        } else {
+          result.textContent = '❌ Lỗi tải lên!';
+        }
+      };
+
       xhr.send(formData);
     });
   </script>
-
 </body>
 </html>
