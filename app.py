@@ -5,53 +5,47 @@ import cloudinary.api
 
 app = Flask(__name__)
 
-# ⚙️ Cấu hình Cloudinary (API thật của bạn)
+# ⚡ CẤU HÌNH CLOUDINARY (thay thông tin của bạn vào đây)
 cloudinary.config(
-    cloud_name="dma3eclgv",
-    api_key="118974677734641",
-    api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4",
-    secure=True
+    cloud_name="ten_cloud_cua_ban",
+    api_key="123456789012345",
+    api_secret="abcdefghiABCDEFGHIJKLMN"
 )
 
+# 🔐 MẬT KHẨU ADMIN XOÁ FILE
+ADMIN_PASSWORD = "xoaanh"
+
+# 🏠 TRANG UPLOAD
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# 📤 UPLOAD FILE
 @app.route('/upload', methods=['POST'])
-def upload():
-    file = request.files.get('file')
+def upload_file():
+    file = request.files['file']
     if not file:
-        return jsonify({'error': 'Không có file nào được chọn'}), 400
-    try:
-        # ⚙️ Cho phép Cloudinary tự nhận diện ảnh hoặc video
-        result = cloudinary.uploader.upload(file, resource_type="auto")
-        return jsonify({
-            'url': result['secure_url'],
-            'public_id': result['public_id']
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": "Không có file"}), 400
+    upload_result = cloudinary.uploader.upload(file)
+    return jsonify({"url": upload_result['secure_url']})
 
+# 📸 TRANG GALLERY
 @app.route('/gallery')
 def gallery():
-    try:
-        # 🔍 Lấy cả ảnh và video
-        images = cloudinary.api.resources(type="upload", resource_type="image", max_results=100)
-        videos = cloudinary.api.resources(type="upload", resource_type="video", max_results=100)
-        files = images.get('resources', []) + videos.get('resources', [])
-        files.sort(key=lambda x: x['created_at'], reverse=True)
-        return render_template('gallery.html', files=files)
-    except Exception as e:
-        return f"<h3 style='color:red;'>❌ Lỗi tải dữ liệu: {str(e)}</h3>"
+    resources = cloudinary.api.resources(type='upload', max_results=100)
+    return render_template('gallery.html', resources=resources['resources'])
 
+# 🗑️ XOÁ FILE (có xác thực mật khẩu)
 @app.route('/delete/<public_id>', methods=['DELETE'])
 def delete_file(public_id):
+    password = request.args.get("password")
+    if password != ADMIN_PASSWORD:
+        return jsonify({"error": "Sai mật khẩu"}), 403
     try:
-        # Xóa ảnh hoặc video tự động
-        result = cloudinary.uploader.destroy(public_id, resource_type="auto")
-        return jsonify(result)
+        cloudinary.uploader.destroy(public_id, invalidate=True)
+        return jsonify({"success": True})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
