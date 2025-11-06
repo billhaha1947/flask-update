@@ -2,19 +2,65 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Thư viện</title>
+    <title>📸 Thư viện ảnh & video</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        .media-card { border-radius: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .media-card img, .media-card video { width: 100%; height: 250px; object-fit: cover; }
+        body {
+            background: linear-gradient(135deg, #f9f7ff, #e0f3ff);
+            font-family: 'Poppins', sans-serif;
+        }
+        h2 {
+            color: #444;
+            text-shadow: 1px 1px #fff;
+        }
+        .media-card {
+            border-radius: 18px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .media-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+        .media-card img, .media-card video {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-bottom: 2px solid #f1f1f1;
+        }
+        .btn-delete {
+            background-color: #ff6b81;
+            border: none;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        .btn-delete:hover {
+            background-color: #ff4757;
+        }
+        .password-box {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #777;
+        }
     </style>
 </head>
-<body class="bg-light p-4">
-    <h2 class="text-center mb-4">📁 Thư viện ảnh & video</h2>
-    <div class="container">
+<body class="p-4">
+    <div class="container text-center">
+        <h2 class="mb-4">📁 Thư viện ảnh & video học sinh</h2>
         <div class="row g-4">
             {% for item in media %}
-            <div class="col-md-4">
+            <div class="col-6 col-md-4 col-lg-3">
                 <div class="media-card">
                     {% if item.resource_type == 'image' %}
                         <img src="{{ item.secure_url }}" alt="">
@@ -22,9 +68,9 @@
                         <video src="{{ item.secure_url }}" controls></video>
                     {% endif %}
                     <div class="p-3 text-center">
-                        <button class="btn btn-danger btn-sm" onclick="showDelete('{{ item.public_id }}')">Xóa</button>
-                        <div id="pw-{{ item.public_id }}" class="mt-2" style="display:none;">
-                            <input type="password" id="pass-{{ item.public_id }}" class="form-control mb-2" placeholder="Nhập mật khẩu">
+                        <button class="btn btn-delete btn-sm" onclick="showDelete('{{ item.public_id }}')">🗑 Xóa</button>
+                        <div id="pw-{{ item.public_id }}" class="password-box mt-2" style="display:none;">
+                            <input type="password" id="pass-{{ item.public_id }}" class="form-control mb-2" placeholder="🔒 Nhập mật khẩu...">
                             <button class="btn btn-outline-danger btn-sm" onclick="deleteItem('{{ item.public_id }}')">Xác nhận</button>
                         </div>
                     </div>
@@ -32,7 +78,10 @@
             </div>
             {% endfor %}
         </div>
+        <a href="/" class="btn btn-outline-primary mt-5">⬅ Quay lại trang tải lên</a>
+        <footer class="mt-4">🌸 Làm bởi Billhaha💕</footer>
     </div>
+
     <script>
         function showDelete(id) {
             document.getElementById('pw-' + id).style.display = 'block';
@@ -46,10 +95,10 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert("Đã xóa thành công!");
+                alert("✅ Ảnh/video đã bị xóa!");
                 location.reload();
             } else {
-                alert(data.error || "Lỗi xóa!");
+                alert(data.error || "❌ Lỗi xóa!");
             }
         }
     </script>
