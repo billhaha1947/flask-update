@@ -1,51 +1,26 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thư viện ảnh & video</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 20px; }
-    h1 { text-align: center; }
-    a { display: inline-block; margin-bottom: 15px; color: #007bff; text-decoration: none; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
-    }
-    img, video {
-      width: 100%;
-      border-radius: 12px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-    }
-    img:hover, video:hover {
-      transform: scale(1.05);
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Thư viện ảnh & video</title>
 </head>
 <body>
-  <h1>📸 Thư viện ảnh & video</h1>
-  <a href="/">← Quay lại</a>
+    <h1>📷 Thư viện ảnh</h1>
+    <a href="/">← Quay lại</a>
 
-  <h2>Ảnh</h2>
-  <div class="grid">
-    {% for img in images %}
-      <a href="{{ img.url }}" target="_blank">
-        <img src="{{ img.url }}" alt="">
-      </a>
-    {% endfor %}
-  </div>
+    <div>
+        {% for img in images %}
+            <img src="{{ img.secure_url }}" width="200" style="margin:5px;">
+        {% endfor %}
+    </div>
 
-  <h2>Video</h2>
-  <div class="grid">
-    {% for vid in videos %}
-      <video controls>
-        <source src="{{ vid.url }}" type="video/mp4">
-        Trình duyệt không hỗ trợ video.
-      </video>
-    {% endfor %}
-  </div>
+    <h1>🎥 Thư viện video</h1>
+    <div>
+        {% for vid in videos %}
+            <video width="300" controls style="margin:5px;">
+                <source src="{{ vid.secure_url }}" type="video/mp4">
+            </video>
+        {% endfor %}
+    </div>
 </body>
 </html>
