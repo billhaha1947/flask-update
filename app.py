@@ -12,7 +12,7 @@ cloudinary.config(
     api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4"
 )
 
-DELETE_PASSWORD = "12345"  # mật khẩu xóa
+DELETE_PASSWORD = "xoa"  # mật khẩu xóa
 
 @app.route("/")
 def index():
