@@ -1,193 +1,150 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌸 Upload Gallery</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #89f7fe, #66a6ff);
-      background-size: 400% 400%;
-      animation: gradient 10s ease infinite;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #333;
-      margin: 0;
-    }
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .container {
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      padding: 30px;
-      width: 90%;
-      max-width: 550px;
-      text-align: center;
-      transition: 0.3s;
-    }
-    h2 {
-      color: #444;
-      margin-bottom: 15px;
-    }
-    input[type="file"] {
-      display: none;
-    }
-    label[for="fileInput"] {
-      background: #66a6ff;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: 600;
-      display: inline-block;
-      transition: 0.3s;
-    }
-    label[for="fileInput"]:hover {
-      background: #558dff;
-    }
-    #preview {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-    }
-    .preview-item {
-      position: relative;
-      width: 90px;
-      height: 90px;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    .preview-item img, .preview-item video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .bar {
-      width: 100%;
-      height: 10px;
-      background: #eee;
-      border-radius: 5px;
-      margin-top: 10px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #00c6ff, #0072ff);
-      border-radius: 5px;
-      transition: width 0.3s ease;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 15px;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #43a047;
-    }
-    a.btn {
-      display: inline-block;
-      background: #2196F3;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 25px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: 0.3s;
-      margin-top: 10px;
-    }
-    a.btn:hover { background: #1976D2; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎞️ Thư viện Cloudinary</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #89f7fe, #66a6ff);
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    text-align: center;
+    color: white;
+    padding: 20px 0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+  }
+  .media-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    background: white;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  .media-card:hover { transform: scale(1.05); }
+  .media-card img, .media-card video {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+  }
+  .delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255,0,0,0.8);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .popup-content {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .popup img, .popup video {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>🌸 Upload Ảnh & Video</h2>
-    <form id="uploadForm">
-      <label for="fileInput">Chọn tệp 📁</label>
-      <input type="file" id="fileInput" name="file" multiple required accept="image/*,video/*">
-      <div id="preview"></div>
-      <button type="submit">Tải lên 🚀</button>
-    </form>
-    <div id="progressContainer"></div>
-    <a href="/gallery" class="btn">📸 Xem Thư Viện</a>
+
+<h1>🎞️ Thư viện Cloudinary</h1>
+<a href="/" style="text-decoration:none;display:block;text-align:center;margin-bottom:10px;">
+  <button style="background:#28a745;color:white;padding:10px 20px;border:none;border-radius:10px;">⬅️ Quay lại Upload</button>
+</a>
+
+<div class="gallery">
+  {% for res in resources %}
+  <div class="media-card">
+    {% if res.resource_type == "video" %}
+      <video src="{{ res.secure_url }}" muted loop playsinline></video>
+    {% else %}
+      <img src="{{ res.secure_url }}" alt="Ảnh">
+    {% endif %}
+    <button class="delete-btn" data-id="{{ res.public_id }}">🗑️</button>
   </div>
+  {% endfor %}
+</div>
 
-  <script>
-    const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    const form = document.getElementById('uploadForm');
-    const progressContainer = document.getElementById('progressContainer');
+<div class="popup" id="popup" onclick="closePopup()">
+  <div class="popup-content" id="popup-content"></div>
+</div>
 
-    fileInput.addEventListener('change', () => {
-      preview.innerHTML = '';
-      Array.from(fileInput.files).forEach(file => {
-        const item = document.createElement('div');
-        item.classList.add('preview-item');
-        const url = URL.createObjectURL(file);
-        if (file.type.startsWith('video')) {
-          item.innerHTML = `<video src="${url}" muted></video>`;
-        } else {
-          item.innerHTML = `<img src="${url}">`;
-        }
-        preview.appendChild(item);
-      });
+<script>
+document.querySelectorAll('.media-card').forEach(card => {
+  card.addEventListener('click', e => {
+    if (e.target.classList.contains('delete-btn')) return;
+    const media = card.querySelector('img, video');
+    const type = media.tagName.toLowerCase();
+    const popup = document.getElementById('popup');
+    const content = document.getElementById('popup-content');
+    content.innerHTML = type === 'video' ? 
+      `<video src="${media.src}" controls autoplay></video>` : 
+      `<img src="${media.src}" alt="Ảnh gốc">`;
+    popup.style.display = 'flex';
+  });
+});
+
+function closePopup() {
+  document.getElementById('popup').style.display = 'none';
+}
+
+document.querySelectorAll('.delete-btn').forEach(btn => {
+  btn.addEventListener('click', async e => {
+    e.stopPropagation();
+    const password = prompt("🔒 Nhập mật khẩu admin để xoá:");
+    if (!password) return;
+
+    const res = await fetch(`/delete/${btn.dataset.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
     });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const files = fileInput.files;
-      if (!files.length) return alert("Chọn ít nhất một tệp!");
-
-      progressContainer.innerHTML = "";
-      Array.from(files).forEach(uploadFile);
-    });
-
-    function uploadFile(file) {
-      const progressBar = document.createElement('div');
-      progressBar.classList.add('bar');
-      progressBar.innerHTML = `<div class="bar-fill"></div>`;
-      progressContainer.appendChild(progressBar);
-      const fill = progressBar.querySelector('.bar-fill');
-
-      const xhr = new XMLHttpRequest();
-      const formData = new FormData();
-      formData.append('file', file);
-      xhr.open('POST', '/upload', true);
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          fill.style.width = percent + '%';
-        }
-      };
-
-      xhr.onload = () => {
-        fill.style.width = '100%';
-        fill.style.background = xhr.status === 200 ? '#4CAF50' : '#F44336';
-      };
-
-      xhr.send(formData);
+    const data = await res.json();
+    if (data.success) {
+      btn.closest('.media-card').style.transition = '0.4s';
+      btn.closest('.media-card').style.opacity = '0';
+      setTimeout(() => btn.closest('.media-card').remove(), 400);
+    } else {
+      alert(data.message || "❌ Sai mật khẩu hoặc lỗi khi xoá!");
     }
-  </script>
+  });
+});
+</script>
+
 </body>
 </html>
