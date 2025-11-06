@@ -3,191 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌸 Upload Gallery</title>
+  <title>Upload Ảnh & Video</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #89f7fe, #66a6ff);
-      background-size: 400% 400%;
-      animation: gradient 10s ease infinite;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #333;
-      margin: 0;
-    }
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .container {
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      padding: 30px;
-      width: 90%;
-      max-width: 550px;
-      text-align: center;
-      transition: 0.3s;
-    }
-    h2 {
-      color: #444;
-      margin-bottom: 15px;
-    }
-    input[type="file"] {
-      display: none;
-    }
-    label[for="fileInput"] {
-      background: #66a6ff;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: 600;
-      display: inline-block;
-      transition: 0.3s;
-    }
-    label[for="fileInput"]:hover {
-      background: #558dff;
-    }
-    #preview {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-    }
-    .preview-item {
-      position: relative;
-      width: 90px;
-      height: 90px;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    .preview-item img, .preview-item video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .bar {
-      width: 100%;
-      height: 10px;
-      background: #eee;
-      border-radius: 5px;
-      margin-top: 10px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #00c6ff, #0072ff);
-      border-radius: 5px;
-      transition: width 0.3s ease;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 15px;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #43a047;
-    }
-    a.btn {
-      display: inline-block;
-      background: #2196F3;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 25px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: 0.3s;
-      margin-top: 10px;
-    }
-    a.btn:hover { background: #1976D2; }
+      body { background: linear-gradient(180deg, #dfefff, #ffffff); font-family: 'Poppins', sans-serif; }
+      .upload-box {
+          margin-top: 10%;
+          padding: 40px;
+          border-radius: 20px;
+          background: #fff;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>🌸 Upload Ảnh & Video</h2>
-    <form id="uploadForm">
-      <label for="fileInput">Chọn tệp 📁</label>
-      <input type="file" id="fileInput" name="file" multiple required accept="image/*,video/*">
-      <div id="preview"></div>
-      <button type="submit">Tải lên 🚀</button>
-    </form>
-    <div id="progressContainer"></div>
-    <a href="/gallery" class="btn">📸 Xem Thư Viện</a>
+  <div class="container text-center">
+    <div class="upload-box mx-auto col-md-6">
+      <h2>📤 Upload Ảnh & Video</h2>
+      <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" multiple accept="image/*,video/*" class="form-control mb-3">
+        <button type="submit" class="btn btn-primary w-100">Tải lên</button>
+      </form>
+      <a href="/gallery" class="btn btn-outline-secondary mt-3 w-100">📁 Xem thư viện</a>
+    </div>
   </div>
-
-  <script>
-    const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    const form = document.getElementById('uploadForm');
-    const progressContainer = document.getElementById('progressContainer');
-
-    fileInput.addEventListener('change', () => {
-      preview.innerHTML = '';
-      Array.from(fileInput.files).forEach(file => {
-        const item = document.createElement('div');
-        item.classList.add('preview-item');
-        const url = URL.createObjectURL(file);
-        if (file.type.startsWith('video')) {
-          item.innerHTML = `<video src="${url}" muted></video>`;
-        } else {
-          item.innerHTML = `<img src="${url}">`;
-        }
-        preview.appendChild(item);
-      });
-    });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const files = fileInput.files;
-      if (!files.length) return alert("Chọn ít nhất một tệp!");
-
-      progressContainer.innerHTML = "";
-      Array.from(files).forEach(uploadFile);
-    });
-
-    function uploadFile(file) {
-      const progressBar = document.createElement('div');
-      progressBar.classList.add('bar');
-      progressBar.innerHTML = `<div class="bar-fill"></div>`;
-      progressContainer.appendChild(progressBar);
-      const fill = progressBar.querySelector('.bar-fill');
-
-      const xhr = new XMLHttpRequest();
-      const formData = new FormData();
-      formData.append('file', file);
-      xhr.open('POST', '/upload', true);
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          fill.style.width = percent + '%';
-        }
-      };
-
-      xhr.onload = () => {
-        fill.style.width = '100%';
-        fill.style.background = xhr.status === 200 ? '#4CAF50' : '#F44336';
-      };
-
-      xhr.send(formData);
-    }
-  </script>
 </body>
 </html>
