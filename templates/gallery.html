@@ -13,7 +13,7 @@
             position: relative;
         }
 
-        /* Hiệu ứng mây bay */
+        /* Mây bay nhẹ */
         .cloud {
             position: absolute;
             background: white;
@@ -73,17 +73,28 @@
         }
 
         .delete-section {
-            display: none;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.9);
             padding: 10px;
             text-align: center;
             position: absolute;
             bottom: 0;
             width: 100%;
+            display: none;
         }
 
-        .card:hover .delete-section {
-            display: block;
+        /* Chỉ hiện khi hover trên PC */
+        @media (hover: hover) {
+            .card:hover .delete-section {
+                display: block;
+            }
+        }
+
+        /* Trên điện thoại luôn hiện */
+        @media (hover: none) {
+            .delete-section {
+                display: block;
+                position: relative;
+            }
         }
 
         .delete-section input {
@@ -144,7 +155,7 @@
             <video src="{{ item.secure_url }}" controls></video>
             {% endif %}
             <div class="delete-section">
-                <input type="password" placeholder="Nhập mật khẩu..." class="form-control form-control-sm mb-1 password-input">
+                <input type="password" placeholder="🔒 Nhập mật khẩu..." class="form-control form-control-sm mb-1 password-input">
                 <button onclick="deleteFile('{{ item.public_id }}', this)">🗑 Xoá</button>
             </div>
         </div>
@@ -169,7 +180,7 @@
         const data = await res.json();
         if (data.success) {
             card.style.opacity = 0.4;
-            setTimeout(() => card.remove(), 500);
+            setTimeout(() => card.remove(), 400);
         } else {
             alert(data.error || "Lỗi khi xoá file!");
         }
