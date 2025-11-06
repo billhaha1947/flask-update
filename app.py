@@ -1,42 +1,51 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
 app = Flask(__name__)
 
-# 🔧 Cấu hình Cloudinary trực tiếp
+# 🔧 Cấu hình Cloudinary (dùng API của bạn)
 cloudinary.config(
     cloud_name="dma3eclgv",
     api_key="118974677734641",
-    api_secret="8Dhe37EYTtXQVaaPpCsDIRRZSrE4",
+    api_secret="8Dhe37EYtXQVaaPpCsDIRRZSrE4",
     secure=True
 )
 
-# 🏠 Trang chính (Upload)
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# 🚀 Xử lý upload
 @app.route('/upload', methods=['POST'])
 def upload():
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'error': 'Không có file nào được chọn'}), 400
     try:
-        file = request.files['file']
-        upload_result = cloudinary.uploader.upload(file)
-        return redirect(url_for('gallery'))
+        result = cloudinary.uploader.upload(file)
+        return jsonify({
+            'url': result['secure_url'],
+            'public_id': result['public_id']
+        })
     except Exception as e:
-        return f"<h3 style='color:red;'>Lỗi upload: {e}</h3>"
+        return jsonify({'error': str(e)}), 500
 
-# 🖼️ Trang thư viện
 @app.route('/gallery')
 def gallery():
     try:
-        images = cloudinary.api.resources(type="upload", resource_type="image", max_results=50)["resources"]
-        videos = cloudinary.api.resources(type="upload", resource_type="video", max_results=20)["resources"]
-        return render_template('gallery.html', images=images, videos=videos)
+        res = cloudinary.api.resources(max_results=100, type="upload")
+        return render_template('gallery.html', files=res.get('resources', []))
     except Exception as e:
-        return f"<h3 style='color:red;'>Lỗi gallery: {e}</h3>"
+        return f"<h3 style='color:red;'>❌ Lỗi tải dữ liệu: {str(e)}</h3>"
+
+@app.route('/delete/<public_id>', methods=['DELETE'])
+def delete_file(public_id):
+    try:
+        result = cloudinary.uploader.destroy(public_id)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
