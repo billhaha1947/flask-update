@@ -1,31 +1,191 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Ảnh & Video</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <style>
-      body { background: linear-gradient(180deg, #dfefff, #ffffff); font-family: 'Poppins', sans-serif; }
-      .upload-box {
-          margin-top: 10%;
-          padding: 40px;
-          border-radius: 20px;
-          background: #fff;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tải lên Cloudinary</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #89f7fe, #66a6ff);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        h1 {
+            margin-bottom: 15px;
+            color: #004085;
+        }
+
+        .upload-box {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        label {
+            display: block;
+            background: #007bff;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 15px;
+        }
+
+        label:hover {
+            background: #0056b3;
+        }
+
+        .preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .preview img, .preview video {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1e7e34;
+        }
+
+        .progress {
+            width: 100%;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 10px;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #28a745;
+            transition: width 0.3s;
+        }
+
+        .link {
+            margin-top: 15px;
+        }
+
+        a {
+            color: #004085;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-  <div class="container text-center">
-    <div class="upload-box mx-auto col-md-6">
-      <h2>📤 Upload Ảnh & Video</h2>
-      <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" multiple accept="image/*,video/*" class="form-control mb-3">
-        <button type="submit" class="btn btn-primary w-100">Tải lên</button>
-      </form>
-      <a href="/gallery" class="btn btn-outline-secondary mt-3 w-100">📁 Xem thư viện</a>
+    <div class="upload-box">
+        <h1>☁️ Upload lên Cloudinary</h1>
+        <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+            <label for="files">Chọn ảnh hoặc video</label>
+            <input id="files" type="file" name="files[]" multiple accept="image/*,video/*">
+            <div class="preview" id="preview"></div>
+            <button type="submit">Tải lên</button>
+            <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+        </form>
+        <div class="link">
+            <a href="/gallery">📸 Xem thư viện</a>
+        </div>
     </div>
-  </div>
+
+    <script>
+        const fileInput = document.getElementById('files');
+        const preview = document.getElementById('preview');
+        const progressBar = document.getElementById('progressBar');
+        const form = document.getElementById('uploadForm');
+
+        // Hiển thị preview ảnh & video
+        fileInput.addEventListener('change', () => {
+            preview.innerHTML = '';
+            [...fileInput.files].forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    let element;
+                    if (file.type.startsWith('image/')) {
+                        element = document.createElement('img');
+                        element.src = e.target.result;
+                    } else if (file.type.startsWith('video/')) {
+                        element = document.createElement('video');
+                        element.src = e.target.result;
+                        element.controls = true;
+                    }
+                    preview.appendChild(element);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Thanh tiến trình tải
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const files = fileInput.files;
+            if (files.length === 0) {
+                alert('Chưa chọn file nào!');
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            const formData = new FormData(form);
+            xhr.open('POST', '/upload', true);
+
+            xhr.upload.addEventListener('progress', e => {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percent + '%';
+                }
+            });
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    window.location.href = '/gallery';
+                } else {
+                    alert('Lỗi tải lên!');
+                }
+            };
+
+            xhr.send(formData);
+        });
+    </script>
 </body>
 </html>
