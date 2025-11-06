@@ -3,204 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thư viện ảnh & video</title>
+  <title>Thư viện Cloudinary</title>
   <style>
-    :root {
-      --bg-light: #fafafa;
-      --bg-dark: #0f0f0f;
-      --text-light: #111;
-      --text-dark: #f1f1f1;
-      --card-light: #fff;
-      --card-dark: #1a1a1a;
-      --accent: #0099ff;
-    }
-
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg-light);
-      color: var(--text-light);
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
       margin: 0;
       padding: 0;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: var(--bg-dark);
-        color: var(--text-dark);
-      }
-    }
-
-    header {
       text-align: center;
-      background: linear-gradient(120deg, #0099ff, #66ccff);
-      color: white;
-      padding: 25px 10px;
-      font-size: 1.8em;
-      font-weight: bold;
-      letter-spacing: 1px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    a.back {
-      display: inline-block;
-      margin: 15px;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: bold;
-      transition: color 0.2s;
+    h1 {
+      margin-top: 30px;
     }
 
-    a.back:hover {
-      text-decoration: underline;
-      color: #0078e8;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
-      padding: 20px;
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 30px;
     }
 
     .item {
-      position: relative;
-      overflow: hidden;
-      border-radius: 12px;
-      background: var(--card-light);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .item {
-        background: var(--card-dark);
-        box-shadow: 0 2px 10px rgba(255,255,255,0.05);
-      }
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 10px;
+      width: 280px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.3s;
     }
 
     .item:hover {
       transform: scale(1.05);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      filter: brightness(1.1);
     }
 
-    .item img,
-    .item video {
+    img, video {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      border-radius: 12px;
-    }
-
-    /* Lightbox */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn 0.4s ease;
-    }
-
-    .lightbox.active {
-      display: flex;
-    }
-
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
-    }
-
-    .lightbox img,
-    .lightbox video {
-      max-width: 90%;
-      max-height: 90%;
       border-radius: 10px;
-      box-shadow: 0 0 25px rgba(255,255,255,0.2);
-      animation: zoomIn 0.3s ease;
+      max-height: 200px;
+      object-fit: cover;
     }
 
-    @keyframes zoomIn {
-      from {transform: scale(0.9); opacity: 0.7;}
-      to {transform: scale(1); opacity: 1;}
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 20px;
-      right: 25px;
+    a.btn {
+      display: inline-block;
+      background: #4CAF50;
       color: white;
-      font-size: 2em;
-      cursor: pointer;
-      background: rgba(0,0,0,0.5);
-      border-radius: 50%;
-      padding: 5px 12px;
-      line-height: 1;
-      transition: background 0.3s;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 20px;
+      transition: 0.3s;
     }
 
-    .close-btn:hover {
-      background: rgba(255,255,255,0.2);
+    a.btn:hover {
+      background: #45a049;
     }
 
+    .empty {
+      margin-top: 40px;
+      font-size: 1.2em;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
 
-  <header>📷 Thư viện ảnh & video</header>
-  <a href="/" class="back">← Quay lại</a>
+  <h1>📸 Thư viện Cloudinary</h1>
+  <a href="/" class="btn">⬅️ Quay lại Upload</a>
 
-  <div class="gallery">
-    {% for img in images %}
-      <div class="item" onclick="openLightbox('{{ img.secure_url }}', 'image')">
-        <img src="{{ img.secure_url }}" alt="Ảnh Cloudinary">
-      </div>
-    {% endfor %}
+  <div class="container">
+    {% if images or videos %}
+      {% for img in images %}
+        <div class="item">
+          <img src="{{ img.url }}" alt="Ảnh Cloudinary">
+        </div>
+      {% endfor %}
 
-    {% for vid in videos %}
-      <div class="item" onclick="openLightbox('{{ vid.secure_url }}', 'video')">
-        <video src="{{ vid.secure_url }}" muted></video>
-      </div>
-    {% endfor %}
+      {% for vid in videos %}
+        <div class="item">
+          <video controls>
+            <source src="{{ vid.url }}" type="video/mp4">
+          </video>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty">😢 Chưa có ảnh hoặc video nào được tải lên.</div>
+    {% endif %}
   </div>
-
-  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-    <span class="close-btn">&times;</span>
-    <img id="lightboxImg" src="" alt="">
-    <video id="lightboxVid" controls></video>
-  </div>
-
-  <script>
-    const lightbox = document.getElementById('lightbox');
-    const imgEl = document.getElementById('lightboxImg');
-    const vidEl = document.getElementById('lightboxVid');
-
-    function openLightbox(src, type) {
-      lightbox.classList.add('active');
-      if (type === 'image') {
-        imgEl.src = src;
-        imgEl.style.display = 'block';
-        vidEl.style.display = 'none';
-      } else {
-        vidEl.src = src;
-        vidEl.style.display = 'block';
-        imgEl.style.display = 'none';
-      }
-    }
-
-    function closeLightbox() {
-      lightbox.classList.remove('active');
-      imgEl.src = '';
-      vidEl.src = '';
-    }
-  </script>
 
 </body>
 </html>
