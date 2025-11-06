@@ -18,6 +18,10 @@ DELETE_PASSWORD = "xoa"  # mật khẩu xóa
 def index():
     return render_template("index.html")
 
+@app.route('/upload', methods=['POST'])
+def upload():
+    ...
+
 @app.route("/gallery")
 def gallery():
     # Lấy cả ảnh và video từ Cloudinary
