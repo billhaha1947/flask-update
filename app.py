@@ -23,15 +23,14 @@ def index():
 # --- Xử lý upload ---
 @app.route("/upload", methods=["POST"])
 def upload():
-    if "files[]" not in request.files:
-        return "Không có file nào được chọn!", 400
-
     files = request.files.getlist("files[]")
-    uploaded_files = []
+    if not files or files == [None]:
+        return jsonify({"success": False, "message": "Không có file nào được chọn!"}), 400
 
+    uploaded_files = []
     for file in files:
         if file:
-            # Cloudinary tự nhận dạng ảnh/video
+            # Cloudinary tự nhận ảnh/video
             result = cloudinary.uploader.upload(file, resource_type="auto")
             uploaded_files.append(result)
 
@@ -41,11 +40,9 @@ def upload():
 # --- Trang thư viện ---
 @app.route("/gallery")
 def gallery():
-    # Lấy ảnh & video
     images = cloudinary.api.resources(type="upload", resource_type="image", max_results=100)["resources"]
     videos = cloudinary.api.resources(type="upload", resource_type="video", max_results=100)["resources"]
 
-    # Gộp & sắp xếp theo thời gian
     all_items = images + videos
     all_items.sort(key=lambda x: x["created_at"], reverse=True)
 
@@ -59,7 +56,6 @@ def delete_file(public_id):
         return jsonify({"success": False, "message": "Sai mật khẩu!"})
 
     try:
-        # Thử xóa ảnh & video (chỉ 1 trong 2 sẽ tồn tại)
         cloudinary.api.delete_resources([public_id], resource_type="image")
         cloudinary.api.delete_resources([public_id], resource_type="video")
         return jsonify({"success": True})
