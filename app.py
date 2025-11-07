@@ -22,20 +22,26 @@ def index():
 
 # --- Xử lý upload ---
 @app.route("/upload", methods=["POST"])
+@app.route("/upload", methods=["POST"])
 def upload():
-    files = request.files.getlist("files[]")
-    if not files or files == [None]:
+    files = request.files.getlist("files")
+    if not files:
         return jsonify({"success": False, "message": "Không có file nào được chọn!"}), 400
 
     uploaded_files = []
     for file in files:
-        if file:
-            # Cloudinary tự nhận ảnh/video
-            result = cloudinary.uploader.upload(file, resource_type="auto")
-            uploaded_files.append(result)
+        if file and file.filename:
+            try:
+                result = cloudinary.uploader.upload(file, resource_type="auto")
+                uploaded_files.append(result)
+            except Exception as e:
+                print("❌ Upload lỗi:", e)
 
-    print("Đã upload:", [f["public_id"] for f in uploaded_files])
-    return jsonify({"success": True, "count": len(uploaded_files)})
+    if not uploaded_files:
+        return jsonify({"success": False, "message": "Upload thất bại!"}), 500
+
+    print("✅ Đã upload:", [f["public_id"] for f in uploaded_files])
+    return jsonify({"success": True, "count": len(uploaded_files)})len(uploaded_files)})
 
 # --- Trang thư viện ---
 @app.route("/gallery")
