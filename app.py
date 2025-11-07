@@ -37,8 +37,8 @@ def upload():
             uploaded_files.append(upload_result)
 
     print("Đã upload:", uploaded_files)
-    return redirect("/gallery")
-
+    # ✅ Đừng redirect ở đây — chỉ trả JSON để JS xử lý
+    return jsonify({"success": True, "count": len(uploaded_files)})
 # --- Route xem gallery ---
 @app.route("/gallery")
 def gallery():
