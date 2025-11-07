@@ -51,7 +51,7 @@ def gallery():
         images = cloudinary.api.resources(type="upload", resource_type="image", max_results=100)["resources"]
     except:
         images = []
-l
+
     try:
         videos = cloudinary.api.resources(type="upload", resource_type="video", max_results=100)["resources"]
     except:
@@ -69,7 +69,7 @@ def delete(public_id):
     data = request.get_json()
     password = data.get("password", "")
 
-    if password != "xoa":  # thay mật khẩu bạn muốn
+    if password != DELETE_PASSWORD:
         return jsonify({"error": "Sai mật khẩu"}), 403
 
     try:
@@ -78,8 +78,6 @@ def delete(public_id):
     except Exception as e:
         print("Lỗi xóa:", e)
         return jsonify({"error": "Xóa thất bại"}), 500
-
-
 # --- Chạy ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
