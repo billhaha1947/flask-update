@@ -48,18 +48,29 @@ def upload():
 @app.route("/gallery")
 def gallery():
     try:
-        images = cloudinary.api.resources(type="upload", resource_type="image", max_results=100)["resources"]
-    except:
+        images = cloudinary.api.resources(
+            resource_type="image",
+            type="upload",
+            max_results=100
+        ).get("resources", [])
+    except Exception as e:
+        print("❌ Lỗi tải ảnh:", e)
         images = []
 
     try:
-        videos = cloudinary.api.resources(type="upload", resource_type="video", max_results=100)["resources"]
-    except:
+        videos = cloudinary.api.resources(
+            resource_type="video",
+            type="upload",
+            max_results=100
+        ).get("resources", [])
+    except Exception as e:
+        print("❌ Lỗi tải video:", e)
         videos = []
 
     all_items = images + videos
-    all_items.sort(key=lambda x: x["created_at"], reverse=True)
+    all_items.sort(key=lambda x: x.get("created_at", ""), reverse=True)
 
+    print(f"✅ Gallery load: {len(images)} ảnh, {len(videos)} video")
     return render_template("gallery.html", resources=all_items)
 
 
