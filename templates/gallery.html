@@ -1,207 +1,58 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>📸 Thư viện Ảnh & Video</title>
-<style>
-  :root {
-    --bg: #f4f7ff;
-    --card: #fff;
-    --accent: #4c7dff;
-    --accent-2: #6ecbff;
-    --text: #2d2d2d;
-    --muted: #70798b;
-  }
-  body {
-    margin:0;
-    font-family: "Segoe UI", Roboto, sans-serif;
-    background: linear-gradient(180deg,#eef4ff 0%, #fefbff 100%);
-    color: var(--text);
-    padding: 20px;
-  }
-  header {
-    display:flex; justify-content:space-between; align-items:center;
-    margin-bottom: 20px;
-  }
-  h1 {
-    font-size: 24px;
-    display:flex; align-items:center; gap:8px;
-  }
-  a.back {
-    text-decoration:none;
-    background: var(--accent);
-    color:white;
-    padding:8px 14px;
-    border-radius:8px;
-    font-weight:600;
-    transition:0.3s;
-  }
-  a.back:hover { background:#3259d9; }
-
-  .grid {
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-    gap:16px;
-  }
-  .item {
-    background:var(--card);
-    border-radius:12px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
-    overflow:hidden;
-    transition:transform .25s ease, box-shadow .25s ease;
-    position:relative;
-  }
-  .item:hover {
-    transform:translateY(-4px);
-    box-shadow:0 8px 18px rgba(0,0,0,0.1);
-  }
-  .thumb {
-    width:100%;
-    height:180px;
-    overflow:hidden;
-    display:flex; align-items:center; justify-content:center;
-    background:#f0f3ff;
-    cursor:pointer;
-  }
-  .thumb img, .thumb video {
-    width:100%; height:100%; object-fit:cover;
-  }
-  .info {
-    padding:10px 12px;
-    display:flex; justify-content:space-between; align-items:center;
-  }
-  .btn-del {
-    background:#ff5c5c;
-    color:white;
-    border:none;
-    border-radius:6px;
-    padding:6px 10px;
-    cursor:pointer;
-    font-weight:600;
-  }
-  .btn-del:hover { background:#e13e3e; }
-
-  .pass-box {
-    display:none;
-    margin-top:8px;
-    text-align:center;
-  }
-  .pass-box input {
-    padding:6px 8px;
-    border:1px solid #ccc;
-    border-radius:6px;
-    width:120px;
-  }
-  .pass-box button {
-    padding:6px 8px;
-    margin-left:6px;
-    border:none;
-    background:var(--accent);
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-  }
-
-  /* Lightbox */
-  .lightbox {
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.8);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:100;
-    visibility:hidden;
-    opacity:0;
-    transition:opacity .3s ease;
-  }
-  .lightbox.active {
-    visibility:visible;
-    opacity:1;
-  }
-  .lightbox-content {
-    max-width:90%;
-    max-height:90%;
-  }
-  .lightbox-content img,
-  .lightbox-content video {
-    width:100%;
-    height:auto;
-    border-radius:10px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>📁 Thư viện Cloud</title>
+  <style>
+    body { font-family: "Poppins", sans-serif; background: #f2f2f2; margin: 0; }
+    h1 { text-align: center; padding: 20px; color: #333; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px; padding: 20px;
+    }
+    .item {
+      background: white; border-radius: 10px; padding: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1); text-align: center;
+    }
+    img, video { width: 100%; border-radius: 8px; }
+    button {
+      background: #e63946; color: white; border: none; border-radius: 8px;
+      padding: 6px 12px; margin-top: 8px; cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1>📸 Thư viện Ảnh & Video</h1>
-  <a class="back" href="/">⬅️ Quay lại Upload</a>
-</header>
-
-<div class="grid">
-  {% for r in resources %}
-  <div class="item" data-id="{{ r.public_id }}">
-    <div class="thumb" onclick="openLightbox('{{ r.secure_url }}', '{{ r.resource_type }}')">
-      {% if r.resource_type == 'video' %}
-        <video src="{{ r.secure_url }}" muted></video>
-      {% else %}
-        <img src="{{ r.secure_url }}" alt="">
-      {% endif %}
-    </div>
-    <div class="info">
-      <small>{{ r.format.upper() }}</small>
-      <button class="btn-del" onclick="showPassword('{{ r.public_id }}')">Xóa</button>
-    </div>
-    <div class="pass-box" id="box-{{ r.public_id }}">
-      <input type="password" placeholder="Nhập mật khẩu" id="pass-{{ r.public_id }}">
-      <button onclick="deleteFile('{{ r.public_id }}')">OK</button>
-    </div>
+  <h1>📁 Thư viện Cloud</h1>
+  <div class="grid">
+    {% for r in resources %}
+      <div class="item">
+        {% if r.resource_type == 'image' %}
+          <img src="{{ r.secure_url }}">
+        {% else %}
+          <video src="{{ r.secure_url }}" controls></video>
+        {% endif %}
+        <form action="/delete/{{ r.public_id }}" method="post" onsubmit="return confirmDelete(this);">
+          <input type="password" name="password" placeholder="Mật khẩu xóa" required>
+          <button type="submit">Xóa</button>
+        </form>
+      </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>
 
-<!-- Lightbox -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <div class="lightbox-content" id="lightbox-content"></div>
-</div>
-
-<script>
-function showPassword(id) {
-  const box = document.getElementById("box-" + id);
-  box.style.display = box.style.display === "block" ? "none" : "block";
-}
-
-async function deleteFile(id) {
-  const password = document.getElementById("pass-" + id).value;
-  const res = await fetch(`/delete/${id}`, {
-    method: "POST",
-    headers: {"Content-Type": "application/x-www-form-urlencoded"},
-    body: new URLSearchParams({password})
-  });
-  const data = await res.json();
-  if (data.success) {
-    alert("✅ Đã xóa thành công!");
-    document.querySelector(`[data-id="${id}"]`).remove();
-  } else {
-    alert("❌ " + data.message);
+  <script>
+  async function confirmDelete(form) {
+    const res = await fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form)
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('Đã xóa!');
+      location.reload();
+    } else alert(data.message || 'Lỗi xóa!');
+    return false;
   }
-}
-
-/* Lightbox xem ảnh/video */
-function openLightbox(url, type){
-  const lightbox = document.getElementById("lightbox");
-  const content = document.getElementById("lightbox-content");
-  content.innerHTML = type === "video"
-    ? `<video src="${url}" controls autoplay></video>`
-    : `<img src="${url}" alt="">`;
-  lightbox.classList.add("active");
-}
-function closeLightbox(){
-  const lightbox = document.getElementById("lightbox");
-  const content = document.getElementById("lightbox-content");
-  content.innerHTML = "";
-  lightbox.classList.remove("active");
-}
-</script>
+  </script>
 </body>
 </html>
