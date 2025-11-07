@@ -84,11 +84,21 @@ def delete(public_id):
         return jsonify({"error": "Sai mật khẩu"}), 403
 
     try:
-        cloudinary.uploader.destroy(public_id, resource_type="auto")
-        return jsonify({"success": True})
+        # Thử xóa ảnh
+        result = cloudinary.uploader.destroy(public_id, resource_type="image")
+        if result.get("result") != "ok":
+            # Nếu không phải ảnh thì thử video
+            result = cloudinary.uploader.destroy(public_id, resource_type="video")
+
+        if result.get("result") == "ok":
+            return jsonify({"success": True})
+        else:
+            print("⚠️ Cloudinary trả về:", result)
+            return jsonify({"error": "Không tìm thấy file trên Cloudinary"}), 404
+
     except Exception as e:
-        print("Lỗi xóa:", e)
-        return jsonify({"error": "Xóa thất bại"}), 500
+        print("❌ Lỗi xóa:", e)
+        return jsonify({"error": str(e)}), 500
 # --- Chạy ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
