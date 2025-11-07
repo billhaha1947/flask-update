@@ -2,112 +2,113 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bộ sưu tập</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(120deg, #f5f7fa, #c3cfe2);
+      background: #fafafa;
+      font-family: "Segoe UI", sans-serif;
       margin: 0;
-      padding: 30px;
-      text-align: center;
+      padding: 0;
+      color: #333;
     }
 
     h1 {
-      font-size: 2.5em;
-      color: #333;
-      margin-bottom: 30px;
+      text-align: center;
+      margin: 20px 0;
+      font-size: 26px;
     }
 
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      justify-items: center;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+      padding: 15px;
     }
 
     .item {
       position: relative;
-      background: white;
-      border-radius: 15px;
       overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      background: #ddd;
+      aspect-ratio: 1 / 1;
       cursor: pointer;
-      transition: transform 0.25s;
-      width: 250px;
-      height: 250px;
-      object-fit: cover;
+      transition: transform 0.3s ease;
     }
 
     .item:hover {
       transform: scale(1.03);
     }
 
-    .item img,
-    .item video {
+    img, video {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+      border-radius: 16px;
     }
 
-    .actions {
+    .delete-btn {
       position: absolute;
-      top: 10px;
+      bottom: 10px;
       right: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
     }
 
-    button {
-      background: rgba(0,0,0,0.6);
+    .delete-box {
+      display: none;
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .delete-box input {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .confirm-btn {
+      background: #28a745;
       color: white;
       border: none;
       padding: 6px 10px;
       border-radius: 6px;
+      margin-left: 6px;
       cursor: pointer;
-      transition: 0.2s;
     }
 
-    button:hover {
-      background: rgba(255, 0, 0, 0.8);
-    }
-
-    /* Form nhập mật khẩu */
-    .password-box {
-      display: none;
-      margin-top: 5px;
-    }
-
-    .password-box input {
-      padding: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 100%;
-    }
-
-    /* Phóng to ảnh/video */
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
-      z-index: 999;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.85);
-      justify-content: center;
+      z-index: 1000;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
       align-items: center;
+      justify-content: center;
     }
 
     .modal-content {
       max-width: 90%;
       max-height: 90%;
-      border-radius: 10px;
-      background: #000;
+      border-radius: 16px;
       overflow: hidden;
+      animation: fadeIn 0.3s ease;
     }
 
-    .close {
+    .close-btn {
       position: absolute;
       top: 20px;
       right: 30px;
@@ -116,81 +117,89 @@
       cursor: pointer;
     }
 
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.9);}
+      to {opacity: 1; transform: scale(1);}
+    }
   </style>
 </head>
 <body>
-  <h1>📸 Bộ sưu tập</h1>
+  <h1>📷 Bộ sưu tập</h1>
 
   <div class="gallery">
-    {% for file in resources %}
-      <div class="item" data-url="{{ file.secure_url }}" data-type="{{ file.resource_type }}" data-id="{{ file.public_id }}">
-        {% if file.resource_type == 'image' %}
-          <img src="{{ file.secure_url }}" alt="{{ file.public_id }}">
-        {% elif file.resource_type == 'video' %}
-          <video src="{{ file.secure_url }}" muted></video>
+    {% for res in resources %}
+      <div class="item">
+        {% if res.resource_type == "video" %}
+          <video onclick="openModal('video', '{{ res.url }}')">
+            <source src="{{ res.url }}" type="video/mp4">
+          </video>
+        {% else %}
+          <img src="{{ res.url }}" alt="Ảnh" onclick="openModal('image', '{{ res.url }}')">
         {% endif %}
-        <div class="actions">
-          <button onclick="showPasswordBox(event, '{{ file.public_id }}')">🗑️ Xóa</button>
-          <div class="password-box" id="pw-{{ file.public_id }}">
-            <input type="password" placeholder="Nhập mật khẩu" onkeydown="handleDelete(event, '{{ file.public_id }}')">
-          </div>
+        <button class="delete-btn" onclick="showDeleteBox(this, '{{ res.public_id }}')">Xóa</button>
+
+        <div class="delete-box">
+          <input type="password" placeholder="Nhập mật khẩu">
+          <button class="confirm-btn" onclick="deleteFile('{{ res.public_id }}', this)">Xác nhận</button>
         </div>
       </div>
     {% endfor %}
   </div>
 
-  <!-- Modal phóng to -->
+  <!-- Modal -->
   <div id="modal" class="modal" onclick="closeModal()">
-    <span class="close">&times;</span>
+    <span class="close-btn">&times;</span>
     <div id="modal-content" class="modal-content"></div>
   </div>
 
   <script>
-    // Khi bấm nút xóa -> hiện ô nhập mật khẩu
-    function showPasswordBox(e, id) {
-      e.stopPropagation();
-      const box = document.getElementById("pw-" + id);
+    function showDeleteBox(btn, public_id) {
+      const box = btn.nextElementSibling;
       box.style.display = box.style.display === "block" ? "none" : "block";
     }
 
-    // Xóa khi Enter
-    async function handleDelete(e, id) {
-      if (e.key === "Enter") {
-        const pw = e.target.value;
-        const res = await fetch(`/delete/${id}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: pw })
-        });
-        const data = await res.json();
-        if (data.success) {
-          document.querySelector(`[data-id="${id}"]`).remove();
-        }
+    async function deleteFile(public_id, el) {
+      const box = el.parentElement;
+      const password = box.querySelector("input").value;
+
+      if (!password) return alert("Nhập mật khẩu!");
+
+      const res = await fetch(`/delete/${public_id}`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ password })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("✅ Đã xóa thành công!");
+        location.reload();
+      } else {
+        alert("❌ " + (data.error || data.message || "Xóa thất bại"));
       }
     }
 
-    // Phóng to ảnh / video
-    const modal = document.getElementById("modal");
-    const modalContent = document.getElementById("modal-content");
+    function openModal(type, url) {
+      const modal = document.getElementById("modal");
+      const content = document.getElementById("modal-content");
+      modal.style.display = "flex";
 
-    document.querySelectorAll(".item").forEach(el => {
-      el.addEventListener("click", () => {
-        const url = el.dataset.url;
-        const type = el.dataset.type;
-        modal.style.display = "flex";
-        modalContent.innerHTML =
-          type === "image"
-            ? `<img src="${url}" style="width:100%;height:auto;">`
-            : `<video src="${url}" controls autoplay style="width:100%;height:auto;"></video>`;
-      });
-    });
-
-    function closeModal() {
-      modal.style.display = "none";
-      modalContent.innerHTML = "";
+      if (type === "video") {
+        content.innerHTML = `
+          <video controls autoplay style="width:100%;max-height:90vh;border-radius:16px;background:black;">
+            <source src="${url}" type="video/mp4">
+          </video>`;
+      } else {
+        content.innerHTML = `<img src="${url}" style="width:100%;max-height:90vh;border-radius:16px;">`;
+      }
     }
 
-    document.querySelector(".close").addEventListener("click", closeModal);
+    function closeModal() {
+      const modal = document.getElementById("modal");
+      modal.style.display = "none";
+      document.getElementById("modal-content").innerHTML = "";
+    }
   </script>
 </body>
 </html>
