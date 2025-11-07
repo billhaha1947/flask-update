@@ -23,62 +23,43 @@
       max-width: 500px;
       text-align: center;
     }
-    h1 {
-      color: #333;
-      margin-bottom: 15px;
-    }
+    h1 { color: #333; margin-bottom: 15px; }
     .upload-box {
       border: 3px dashed #999;
       border-radius: 15px;
-      padding: 40px;
+      padding: 30px;
       background: #fafafa;
       transition: all 0.3s ease;
     }
-    .upload-box.dragover {
-      border-color: #00b4d8;
-      background: #e0f7fa;
-    }
-    input[type=file] {
-      display: none;
-    }
+    .upload-box.dragover { border-color: #00b4d8; background: #e0f7fa; }
+    input[type=file] { display: none; }
     label {
       background: linear-gradient(90deg, #00b4d8, #48cae4);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      display: inline-block;
-      margin-top: 15px;
+      color: white; padding: 12px 24px; border-radius: 10px;
+      cursor: pointer; font-weight: bold; display: inline-block; margin-top: 15px;
     }
     button {
       background: linear-gradient(90deg, #00b4d8, #48cae4);
-      color: white;
-      padding: 10px 25px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 20px;
+      color: white; padding: 10px 25px; border: none; border-radius: 10px;
+      font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px;
       transition: 0.3s;
     }
-    button:hover {
-      transform: scale(1.05);
-    }
+    button:hover { transform: scale(1.05); }
     .progress {
-      width: 100%;
-      background: #ddd;
-      height: 10px;
-      border-radius: 6px;
-      margin-top: 20px;
-      overflow: hidden;
+      width: 100%; background: #ddd; height: 10px; border-radius: 6px;
+      margin-top: 20px; overflow: hidden;
     }
     .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #00b4d8, #48cae4);
+      height: 100%; width: 0%; background: linear-gradient(90deg, #00b4d8, #48cae4);
       transition: width 0.4s;
+    }
+    .preview {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+      margin-top: 15px;
+    }
+    .preview-item img, .preview-item video {
+      width: 100px; height: 100px; object-fit: cover;
+      border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
   </style>
 </head>
@@ -91,6 +72,8 @@
         <label for="fileInput">Chọn tệp</label>
         <input type="file" id="fileInput" name="files[]" multiple accept="image/*,video/*">
       </div>
+
+      <div class="preview" id="preview"></div>
       <button type="submit">Tải lên Cloud ☁️</button>
       <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
     </form>
@@ -101,32 +84,51 @@
   const fileInput = document.getElementById('fileInput');
   const dropZone = document.getElementById('dropZone');
   const progressBar = document.getElementById('progressBar');
+  const preview = document.getElementById('preview');
 
   dropZone.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
+    e.preventDefault(); dropZone.classList.add('dragover');
   });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
   dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
+    e.preventDefault(); dropZone.classList.remove('dragover');
     fileInput.files = e.dataTransfer.files;
+    showPreview(e.dataTransfer.files);
   });
+
+  fileInput.addEventListener('change', () => showPreview(fileInput.files));
+
+  function showPreview(files) {
+    preview.innerHTML = '';
+    for (let f of files) {
+      const item = document.createElement('div');
+      item.classList.add('preview-item');
+      if (f.type.startsWith('image')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(f);
+        item.appendChild(img);
+      } else if (f.type.startsWith('video')) {
+        const vid = document.createElement('video');
+        vid.src = URL.createObjectURL(f);
+        vid.controls = true;
+        item.appendChild(vid);
+      }
+      preview.appendChild(item);
+    }
+  }
 
   form.addEventListener('submit', e => {
     e.preventDefault();
     const files = fileInput.files;
     if (!files.length) return alert('Chưa chọn tệp nào!');
+
     const formData = new FormData();
     for (let f of files) formData.append('files[]', f);
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/upload', true);
     xhr.upload.onprogress = e => {
-      if (e.lengthComputable) {
-        const percent = (e.loaded / e.total) * 100;
-        progressBar.style.width = percent + '%';
-      }
+      if (e.lengthComputable) progressBar.style.width = (e.loaded / e.total) * 100 + '%';
     };
     xhr.onload = () => {
       if (xhr.status === 200) window.location.href = '/gallery';
