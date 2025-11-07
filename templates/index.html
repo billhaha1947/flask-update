@@ -123,7 +123,7 @@
     if (!files.length) return alert('Chưa chọn tệp nào!');
 
     const formData = new FormData();
-    for (let f of files) formData.append('files[]', f);
+    for (let f of files) formData.append('files', f);
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/upload', true);
