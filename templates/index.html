@@ -1,270 +1,139 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>📤 Upload ảnh & video</title>
-<style>
-  :root {
-    --accent: #ff4d7e;
-    --accent-2: #6ea8fe;
-    --bg: #f3f7ff;
-    --card: #fff;
-    --muted: #6b7280;
-  }
-  body {
-    margin:0;
-    font-family: "Segoe UI", Roboto, Arial;
-    background: linear-gradient(180deg,#eef6ff 0%, #fef6fb 100%);
-    min-height:100vh;
-    display:flex;
-    align-items:flex-start;
-    justify-content:center;
-    padding:28px 12px;
-  }
-  .wrap {
-    width:100%;
-    max-width:920px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.9));
-    box-shadow: 0 10px 30px rgba(20,30,60,0.08);
-    border-radius:14px;
-    padding:22px;
-  }
-  h1 {
-    margin:0 0 12px 0;
-    font-size:22px;
-    display:flex; gap:10px; align-items:center;
-  }
-  p.lead { margin: 6px 0 18px; color:var(--muted); }
-
-  .controls {
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    align-items:center;
-    margin-bottom:16px;
-  }
-
-  .file-btn {
-    display:inline-block;
-    background: linear-gradient(90deg,var(--accent), #ff9bb3);
-    color:white;
-    padding:10px 14px;
-    border-radius:10px;
-    cursor:pointer;
-    box-shadow: 0 6px 18px rgba(255,77,126,0.12);
-    font-weight:600;
-    text-decoration:none;
-  }
-  .file-list {
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    align-items:center;
-  }
-
-  .btn {
-    background:#2b6ef6;
-    color:white;
-    padding:10px 14px;
-    border-radius:8px;
-    border:none;
-    cursor:pointer;
-    font-weight:600;
-  }
-
-  input[type="file"] { display:none; }
-
-  .preview-grid {
-    display:grid;
-    grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
-    gap:12px;
-    margin-top:18px;
-  }
-
-  .preview {
-    background:var(--card);
-    border-radius:12px;
-    padding:8px;
-    box-shadow:0 6px 14px rgba(20,30,60,0.04);
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    align-items:center;
-  }
-
-  .thumb {
-    width:100%;
-    height:110px;
-    border-radius:8px;
-    background:#f0f4ff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-  }
-
-  .thumb img, .thumb video {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-  }
-
-  .meta {
-    width:100%;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:8px;
-    font-size:13px;
-    color:var(--muted);
-  }
-
-  .progress {
-    width:100%;
-    height:8px;
-    background:#eee;
-    border-radius:6px;
-    overflow:hidden;
-  }
-  .bar {
-    height:100%;
-    width:0%;
-    background: linear-gradient(90deg,var(--accent-2),var(--accent));
-    transition: width .25s linear;
-  }
-
-  .note { color:var(--muted); font-size:13px; margin-top:10px; }
-
-  .nav {
-    display:flex; justify-content:flex-end; gap:8px; margin-top:12px;
-  }
-
-  a.link {
-    text-decoration:none; color:#0b5cff; font-weight:600;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>🌤 Cloud Upload</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 15px;
+    }
+    .upload-box {
+      border: 3px dashed #999;
+      border-radius: 15px;
+      padding: 40px;
+      background: #fafafa;
+      transition: all 0.3s ease;
+    }
+    .upload-box.dragover {
+      border-color: #00b4d8;
+      background: #e0f7fa;
+    }
+    input[type=file] {
+      display: none;
+    }
+    label {
+      background: linear-gradient(90deg, #00b4d8, #48cae4);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 15px;
+    }
+    button {
+      background: linear-gradient(90deg, #00b4d8, #48cae4);
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    .progress {
+      width: 100%;
+      background: #ddd;
+      height: 10px;
+      border-radius: 6px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00b4d8, #48cae4);
+      transition: width 0.4s;
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>📤 Upload ảnh & video học sinh</h1>
-    <p class="lead">Chọn nhiều file cùng lúc. Hỗ trợ ảnh và video. Sau khi tải lên sẽ chuyển về thư viện.</p>
-
-    <div class="controls">
-      <label class="file-btn" id="chooseBtn">Chọn file</label>
-      <input id="fileInput" type="file" name="files[]" multiple accept="image/*,video/*">
-
-      <button class="btn" id="startUpload">Tải lên</button>
-
-      <div style="flex:1"></div>
-
-      <a class="link" href="/gallery">📁 Xem thư viện</a>
-    </div>
-
-    <div id="preview" class="preview-grid" aria-live="polite"></div>
-
-    <div class="note">Lưu ý: không chọn file quá nặng (>100MB) nếu dùng gói free. Nếu trình duyệt không cho chọn video, thử dùng Chrome trên máy hoặc cập nhật trình duyệt.</div>
+  <div class="container">
+    <h1>🌤 Upload ảnh & video</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <div id="dropZone" class="upload-box">
+        <p>Kéo thả tệp vào đây hoặc</p>
+        <label for="fileInput">Chọn tệp</label>
+        <input type="file" id="fileInput" name="files[]" multiple accept="image/*,video/*">
+      </div>
+      <button type="submit">Tải lên Cloud ☁️</button>
+      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    </form>
   </div>
 
-<script>
-const fileInput = document.getElementById('fileInput');
-const chooseBtn = document.getElementById('chooseBtn');
-const preview = document.getElementById('preview');
-const startUpload = document.getElementById('startUpload');
+  <script>
+  const form = document.getElementById('uploadForm');
+  const fileInput = document.getElementById('fileInput');
+  const dropZone = document.getElementById('dropZone');
+  const progressBar = document.getElementById('progressBar');
 
-chooseBtn.addEventListener('click', ()=> fileInput.click());
-
-let filesSelected = [];
-
-fileInput.addEventListener('change', (e)=> {
-  filesSelected = Array.from(e.target.files || []);
-  renderPreviews();
-});
-
-function renderPreviews(){
-  preview.innerHTML = '';
-  if(filesSelected.length === 0){
-    preview.innerHTML = `<div style="grid-column:1/-1;color:var(--muted)">Chưa có file nào được chọn.</div>`;
-    return;
-  }
-
-  filesSelected.forEach((f, idx) => {
-    const url = URL.createObjectURL(f);
-    const isVideo = f.type.startsWith('video/');
-    const card = document.createElement('div');
-    card.className = 'preview';
-    card.innerHTML = `
-      <div class="thumb">${ isVideo ? `<video muted src="${url}"></video>` : `<img src="${url}">` }</div>
-      <div class="meta">
-        <div style="min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</div>
-        <div style="color:var(--muted);font-size:12px">${(f.size/1024/1024).toFixed(1)}MB</div>
-      </div>
-      <div class="progress" aria-hidden="true"><div class="bar" id="bar-${idx}"></div></div>
-    `;
-    preview.appendChild(card);
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
   });
-}
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    fileInput.files = e.dataTransfer.files;
+  });
 
-async function uploadFiles(){
-  if(filesSelected.length === 0){
-    alert('Chưa chọn file nào!');
-    return;
-  }
-
-  startUpload.disabled = true;
-  startUpload.textContent = 'Đang tải...';
-
-  for(let i=0;i<filesSelected.length;i++){
-    const f = filesSelected[i];
-    await uploadSingle(f, i);
-  }
-
-  // xong -> chuyển trang thư viện
-  window.location.href = '/gallery';
-}
-
-function uploadSingle(file, idx){
-  return new Promise((resolve, reject) => {
-    const form = new FormData();
-    // server của mày chờ "files[]", nhưng để gửi từng file vẫn dùng same name
-    form.append('files[]', file);
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const files = fileInput.files;
+    if (!files.length) return alert('Chưa chọn tệp nào!');
+    const formData = new FormData();
+    for (let f of files) formData.append('files[]', f);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST','/upload',true);
-
-    xhr.upload.onprogress = (e) => {
-      if(e.lengthComputable){
-        const pct = Math.round(e.loaded / e.total * 100);
-        const bar = document.getElementById(`bar-${idx}`);
-        if(bar) bar.style.width = pct + '%';
+    xhr.open('POST', '/upload', true);
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) {
+        const percent = (e.loaded / e.total) * 100;
+        progressBar.style.width = percent + '%';
       }
     };
-
     xhr.onload = () => {
-      if(xhr.status >= 200 && xhr.status < 300){
-        resolve(xhr.responseText);
-      } else {
-        alert('Upload lỗi file: ' + file.name + ' — status ' + xhr.status);
-        resolve(null); // tiếp tục file khác
-      }
+      if (xhr.status === 200) window.location.href = '/gallery';
+      else alert('Lỗi tải lên!');
     };
-
-    xhr.onerror = () => {
-      alert('Lỗi mạng khi upload ' + file.name);
-      resolve(null);
-    };
-
-    xhr.send(form);
+    xhr.send(formData);
   });
-}
-
-startUpload.addEventListener('click', uploadFiles);
-
-// keyboard accessibility: Enter on chooseBtn
-chooseBtn.addEventListener('keyup', (e)=> { if(e.key==='Enter') fileInput.click(); });
-
-// initial empty preview
-renderPreviews();
-</script>
+  </script>
 </body>
 </html>
