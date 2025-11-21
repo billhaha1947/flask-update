@@ -116,6 +116,22 @@
       font-size: 30px;
       cursor: pointer;
     }
+    .upload-btn {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 15px auto;
+    background: linear-gradient(90deg, #00b4d8, #48cae4);
+    color: white;
+    padding: 10px 22px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    transition: 0.25s ease;
+    }
+    .upload-btn:hover {
+    transform: scale(1.05);
+    }
 
     @keyframes fadeIn {
       from {opacity: 0; transform: scale(0.9);}
@@ -125,6 +141,7 @@
 </head>
 <body>
   <h1>📷 Bộ sưu tập</h1>
+  <a href="/" class="upload-btn">⬆️ Tải lên tệp mới</a>
 
   <div class="gallery">
     {% for res in resources %}
