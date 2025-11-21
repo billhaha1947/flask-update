@@ -45,6 +45,22 @@
       transition: 0.3s;
     }
     button:hover { transform: scale(1.05); }
+
+    /* --- Nút Gallery --- */
+    .gallery-btn {
+      display: inline-block;
+      margin-top: 12px;
+      background: linear-gradient(90deg, #48cae4, #00b4d8);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .gallery-btn:hover { transform: scale(1.05); }
+
     .progress {
       width: 100%; background: #ddd; height: 10px; border-radius: 6px;
       margin-top: 20px; overflow: hidden;
@@ -66,6 +82,7 @@
 <body>
   <div class="container">
     <h1>🌤 Upload ảnh & video</h1>
+
     <form id="uploadForm" enctype="multipart/form-data">
       <div id="dropZone" class="upload-box">
         <p>Kéo thả tệp vào đây hoặc</p>
@@ -74,7 +91,12 @@
       </div>
 
       <div class="preview" id="preview"></div>
+
       <button type="submit">Tải lên Cloud ☁️</button>
+
+      <!-- ⭐ NÚT ĐI ĐẾN GALLERY ⭐ -->
+      <a href="gallery.html" class="gallery-btn">Xem Gallery 📁</a>
+
       <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
     </form>
   </div>
